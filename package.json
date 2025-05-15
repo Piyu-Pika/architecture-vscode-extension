@@ -1,0 +1,41 @@
+{
+  "name": "architecture",
+  "publisher": "Piyush Bhardwaj",
+  
+  "displayName": "Architecture",
+  "description": "Generate project folder structures for Flutter, Go, Node.js, and FastAPI",
+  "version": "0.0.3",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "icon": "assets/architecture-icon.jpg",
+  "activationEvents": [
+    "onCommand:architecture.generate"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Piyu-Pika/architecture-vscode-extension"
+  },
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "architecture.generate",
+        "title": "Architecture: Generate Project Structure"
+      }
+    ]
+  },
+    "scripts": {
+      "vscode:prepublish": "npm run compile",
+      "compile": "tsc -p ./",
+      "watch": "tsc -watch -p ./"
+    },
+    "devDependencies": {
+      "@types/node": "^20.14.10",
+      "@types/vscode": "^1.85.0",
+      "typescript": "^5.5.3"
+    }
+  }
