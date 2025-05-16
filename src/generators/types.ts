@@ -1,4 +1,4 @@
-export type ProjectType = 'Flutter' | 'Go' | 'Node.js' | 'FastAPI';
+export type ProjectType = 'Flutter' | 'Go' | 'Node.js' | 'FastAPI' | 'Django' | 'Rust' | 'NextJS' | 'React';
 export type FlutterArchitecture = 'Clean Architecture' | 'MVVM';
 export enum FlutterStateManagement {
     Bloc = 'BLoC',
@@ -7,6 +7,7 @@ export enum FlutterStateManagement {
     Provider = 'Provider',
     None = 'None/Add later'
 }
+
 export interface ProjectConfig {
     projectPath: string;
     projectName: string;

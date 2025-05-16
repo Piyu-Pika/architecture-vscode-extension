@@ -7,7 +7,11 @@ const flutterGenerator_1 = require("./generators/flutterGenerator");
 const goGenerator_1 = require("./generators/goGenerator");
 const nodejsGenerator_1 = require("./generators/nodejsGenerator");
 const fastapiGenerator_1 = require("./generators/fastapiGenerator");
+const rustGenerator_1 = require("./generators/rustGenerator");
+const reactGenerator_1 = require("./generators/reactGenerator");
 const types_1 = require("./generators/types");
+const djangoGenerator_1 = require("./generators/djangoGenerator");
+const nextjsGenerator_1 = require("./generators/nextjsGenerator");
 function activate(context) {
     let disposable = vscode.commands.registerCommand('architecture.generate', async () => {
         // Get workspace folder
@@ -18,7 +22,7 @@ function activate(context) {
         }
         const projectPath = workspaceFolders[0].uri.fsPath;
         // Select project type
-        const projectType = await vscode.window.showQuickPick(['Flutter', 'Go', 'Node.js', 'FastAPI'], { placeHolder: 'Select project type' });
+        const projectType = await vscode.window.showQuickPick(['Flutter', 'Go', 'Node.js', 'FastAPI', 'Django', 'Rust', 'Next.js', 'React'], { placeHolder: 'Select project type' });
         if (!projectType) {
             return;
         }
@@ -74,6 +78,22 @@ function activate(context) {
                 case 'FastAPI':
                     const fastapiGenerator = new fastapiGenerator_1.FastapiGenerator(projectPath, projectName);
                     await fastapiGenerator.generate();
+                    break;
+                case 'Django':
+                    const djangoGenerator = new djangoGenerator_1.DjangoGenerator(projectPath, projectName);
+                    await djangoGenerator.generate();
+                    break;
+                case 'Rust':
+                    const rustGenerator = new rustGenerator_1.RustGenerator(projectPath, projectName);
+                    await rustGenerator.generate();
+                    break;
+                case 'Next.js':
+                    const nextjsGenerator = new nextjsGenerator_1.NextjsGenerator(projectPath, projectName);
+                    await nextjsGenerator.generate();
+                    break;
+                case 'React':
+                    const reactGenerator = new reactGenerator_1.ReactGenerator(projectPath, projectName);
+                    await reactGenerator.generate();
                     break;
             }
             vscode.window.showInformationMessage(`Project structure for ${projectName} created successfully in workspace root!`);

@@ -1,6 +1,6 @@
 {
   "name": "architecture",
-  "publisher": "Piyush Bhardwaj",
+  "publisher": "Piyu-Pika",
   
   "displayName": "Architecture",
   "description": "Generate project folder structures for Flutter, Go, Node.js, and FastAPI",
@@ -9,6 +9,9 @@
     "vscode": "^1.85.0"
   },
   "categories": [
+    "Programming Languages",
+    "Education",
+    "Formatters",
     "Other"
   ],
   "icon": "assets/architecture-icon.jpg",
@@ -19,6 +22,10 @@
     "type": "git",
     "url": "https://github.com/Piyu-Pika/architecture-vscode-extension"
   },
+  "bugs": {
+    "url": "https://github.com/Piyu-Pika/architecture-vscode-extension/issues"
+  },
+  "license": "MIT",
   "main": "./out/extension.js",
   "contributes": {
     "commands": [

@@ -3,7 +3,11 @@ import { FlutterGenerator } from './generators/flutterGenerator';
 import { GoGenerator } from './generators/goGenerator';
 import { NodejsGenerator } from './generators/nodejsGenerator';
 import { FastapiGenerator } from './generators/fastapiGenerator';
+import { RustGenerator } from './generators/rustGenerator';
+import { ReactGenerator } from './generators/reactGenerator';
 import { FlutterArchitecture, FlutterStateManagement, ProjectType } from './generators/types';
+import { DjangoGenerator } from './generators/djangoGenerator';
+import { NextjsGenerator } from './generators/nextjsGenerator';
 
 export function activate(context: vscode.ExtensionContext) {
     let disposable = vscode.commands.registerCommand('architecture.generate', async () => {
@@ -18,7 +22,7 @@ export function activate(context: vscode.ExtensionContext) {
 
         // Select project type
         const projectType = await vscode.window.showQuickPick(
-            ['Flutter', 'Go', 'Node.js', 'FastAPI'],
+            ['Flutter', 'Go', 'Node.js', 'FastAPI', 'Django', 'Rust', 'Next.js', 'React'],
             { placeHolder: 'Select project type' }
         );
 
@@ -96,6 +100,26 @@ export function activate(context: vscode.ExtensionContext) {
                 case 'FastAPI':
                     const fastapiGenerator = new FastapiGenerator(projectPath, projectName);
                     await fastapiGenerator.generate();
+                    break;
+
+                case 'Django':
+                    const djangoGenerator = new DjangoGenerator(projectPath, projectName);
+                    await djangoGenerator.generate();
+                    break;
+
+                case 'Rust':
+                    const rustGenerator = new RustGenerator(projectPath, projectName);
+                    await rustGenerator.generate();
+                    break;
+
+                case 'Next.js':
+                    const nextjsGenerator = new NextjsGenerator(projectPath, projectName);
+                    await nextjsGenerator.generate();
+                    break;
+
+                case 'React':
+                    const reactGenerator = new ReactGenerator(projectPath, projectName);
+                    await reactGenerator.generate();
                     break;
             }
 

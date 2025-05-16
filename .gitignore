@@ -22,3 +22,6 @@ go.work
 
 # OS
 .DS_Store
+*.vsix
+architecture-0.0.3.vsix
+architecture-0.0.3.vsix
