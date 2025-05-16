@@ -1,4 +1,4 @@
-# Architecture
+# CodeArchitect
 
 A VS Code extension to generate project folder structures for various frameworks and languages, including Flutter, Go, Node.js, FastAPI, Django, Rust, React, and Next.js.
 
@@ -26,7 +26,7 @@ Follow these steps to use the extension effectively:
 
 2. **Run the Extension**  
       Open the Command Palette by pressing `Ctrl+Shift+P` (Windows/Linux) or `Cmd+Shift+P` (Mac).  
-      Search for and select the command `Architecture: Generate Project Structure`.
+      Search for and select the command `Code Architect: Generate Project Structure`.
 
 3. **Choose the Options**  
       - Select the type of project you want to generate (e.g., Flutter, Go, Node.js, FastAPI, Django, Rust, React, or Next.js).  

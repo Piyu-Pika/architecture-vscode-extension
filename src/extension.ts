@@ -10,7 +10,7 @@ import { DjangoGenerator } from './generators/djangoGenerator';
 import { NextjsGenerator } from './generators/nextjsGenerator';
 
 export function activate(context: vscode.ExtensionContext) {
-    let disposable = vscode.commands.registerCommand('architecture.generate', async () => {
+    let disposable = vscode.commands.registerCommand('codearchitect.generate', async () => {
         // Get workspace folder
         const workspaceFolders = vscode.workspace.workspaceFolders;
         if (!workspaceFolders) {
