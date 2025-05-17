@@ -12,6 +12,7 @@ const reactGenerator_1 = require("./generators/reactGenerator");
 const types_1 = require("./generators/types");
 const djangoGenerator_1 = require("./generators/djangoGenerator");
 const nextjsGenerator_1 = require("./generators/nextjsGenerator");
+const cmakeGenerator_1 = require("./generators/cmakeGenerator");
 function activate(context) {
     let disposable = vscode.commands.registerCommand('codearchitect.generate', async () => {
         // Get workspace folder
@@ -94,6 +95,10 @@ function activate(context) {
                 case 'React':
                     const reactGenerator = new reactGenerator_1.ReactGenerator(projectPath, projectName);
                     await reactGenerator.generate();
+                    break;
+                case 'CMake':
+                    const cmakeGenerator = new cmakeGenerator_1.CMakeGenerator(projectPath, projectName);
+                    await cmakeGenerator.generate();
                     break;
             }
             vscode.window.showInformationMessage(`Project structure for ${projectName} created successfully in workspace root!`);

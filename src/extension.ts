@@ -23,7 +23,7 @@ export function activate(context: vscode.ExtensionContext) {
 
         // Select project type
         const projectType = await vscode.window.showQuickPick(
-            ['Flutter', 'Go', 'Node.js', 'FastAPI', 'Django', 'Rust', 'Next.js', 'React'],
+            ['Flutter(Dart)', 'Go', 'Node.js(JavaScript)', 'FastAPI(Python)', 'Django(Python)', 'Rust', 'Next.js(JavaScript)', 'React(JavaScript)', 'CMake(C++)'],
             { placeHolder: 'Select project type' }
         );
 
