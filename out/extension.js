@@ -23,7 +23,7 @@ function activate(context) {
         }
         const projectPath = workspaceFolders[0].uri.fsPath;
         // Select project type
-        const projectType = await vscode.window.showQuickPick(['Flutter', 'Go', 'Node.js', 'FastAPI', 'Django', 'Rust', 'Next.js', 'React'], { placeHolder: 'Select project type' });
+        const projectType = await vscode.window.showQuickPick(['Flutter(Dart)', 'Go', 'Node.js(JavaScript)', 'FastAPI(Python)', 'Django(Python)', 'Rust', 'Next.js(JavaScript)', 'React(JavaScript)', 'CMake(C++)'], { placeHolder: 'Select project type' });
         if (!projectType) {
             return;
         }
