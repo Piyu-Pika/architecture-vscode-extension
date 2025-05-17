@@ -5,7 +5,8 @@ import { NodejsGenerator } from './generators/nodejsGenerator';
 import { FastapiGenerator } from './generators/fastapiGenerator';
 import { RustGenerator } from './generators/rustGenerator';
 import { ReactGenerator } from './generators/reactGenerator';
-import { FlutterArchitecture, FlutterStateManagement, ProjectType } from './generators/types';
+import { FlutterStateManagement, ProjectType } from './generators/types';
+import { FlutterArchitecture } from './generators/flutterGenerator';
 import { DjangoGenerator } from './generators/djangoGenerator';
 import { NextjsGenerator } from './generators/nextjsGenerator';
 import { CMakeGenerator } from './generators/cmakeGenerator';
@@ -56,37 +57,55 @@ export function activate(context: vscode.ExtensionContext) {
 
         try {
             switch (projectType) {
-                case 'Flutter':
-                    // For Flutter, select architecture
-                    const architecture = await vscode.window.showQuickPick(
-                        ['Clean Architecture', 'MVVM'],
-                        { placeHolder: 'Select architecture type' }
-                    );
+            case 'Flutter(Dart)':
+                // For Flutter, select architecture with new options
+                const architecture = await vscode.window.showQuickPick(
+                    ['Clean Architecture', 'MVVM', 'Feature-First', 'Basic'],
+                    { placeHolder: 'Select architecture type' }
+                );
 
-                    if (!architecture) {
-                        return;
-                    }
+                if (!architecture) {
+                    return;
+                }
 
-                    // Select state management
-                    const stateManagement = await vscode.window.showQuickPick(
-                        ['BLoC', 'Riverpod', 'GetX', 'Provider', 'None/Add later'],
-                        { placeHolder: 'Select state management solution' }
-                    );
+                // Select state management with new options
+                const stateManagement = await vscode.window.showQuickPick(
+                    ['BLoC', 'Cubit', 'Riverpod', 'GetX', 'Provider', 'MobX', 'None/Add later'],
+                    { placeHolder: 'Select state management solution' }
+                );
 
-                    if (!stateManagement) {
-                        return;
-                    }
+                if (!stateManagement) {
+                    return;
+                }
 
-                    // Map string to FlutterStateManagement enum
-                    const stateManagementEnum = stateManagement === 'BLoC' ? FlutterStateManagement.Bloc :
-                        stateManagement === 'Riverpod' ? FlutterStateManagement.Riverpod :
-                        stateManagement === 'GetX' ? FlutterStateManagement.GetX :
-                        stateManagement === 'Provider' ? FlutterStateManagement.Provider :
-                        FlutterStateManagement.None;
+                // Ask about creating sample screens
+                const createSamplesResponse = await vscode.window.showQuickPick(
+                    ['Yes', 'No'],
+                    { placeHolder: 'Create sample screen scaffolds?' }
+                );
 
-                    const flutterGenerator = new FlutterGenerator(projectPath, projectName, orgIdentifier, architecture as FlutterArchitecture, stateManagementEnum);
-                    await flutterGenerator.generate();
-                    break;
+                if (!createSamplesResponse) {
+                    return;
+                }
+
+                const createSampleScreens = createSamplesResponse === 'Yes';
+
+                // Create project configuration object
+                const config = {
+                    projectPath,
+                    projectName,
+                    orgIdentifier,
+                    architecture: architecture as FlutterArchitecture,
+                    stateManagement: stateManagement as FlutterStateManagement,
+                    createSampleScreens
+                };
+
+                // Initialize and run the generator with the new configuration
+                const flutterGenerator = new FlutterGenerator(config);
+                await flutterGenerator.generate();
+
+                vscode.window.showInformationMessage(`Flutter project created with ${architecture} architecture and ${stateManagement} state management.`);
+                break;
 
                 case 'Go':
                     const goGenerator = new GoGenerator(projectPath, projectName);

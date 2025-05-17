@@ -7,6 +7,8 @@ var FlutterStateManagement;
     FlutterStateManagement["Riverpod"] = "Riverpod";
     FlutterStateManagement["GetX"] = "GetX";
     FlutterStateManagement["Provider"] = "Provider";
+    FlutterStateManagement["MobX"] = "MobX";
+    FlutterStateManagement["Cubit"] = "Cubit";
     FlutterStateManagement["None"] = "None/Add later";
 })(FlutterStateManagement || (exports.FlutterStateManagement = FlutterStateManagement = {}));
 //# sourceMappingURL=types.js.map

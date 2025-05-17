@@ -5,7 +5,7 @@ A VS Code extension to generate project folder structures for various frameworks
 ## ✨ Features
 
 - Generate project structures for:
-     - 📱 Flutter (Clean Architecture or MVVM with various state management options)
+     - 📱 Flutter (Architectures like Clean Architecture, MVVM, Basic, Feature-First and  state managements like BLoC, Riverpod, GetX, Provider, MobX, Cubit, and None/Add later)
      - 🐹 Go
      - 🟢 Node.js
      - 🚀 FastAPI

@@ -4,25 +4,32 @@ exports.FlutterGenerator = void 0;
 const fs = require("fs/promises");
 const path = require("path");
 class FlutterGenerator {
-    constructor(projectPath, projectName, orgIdentifier, architecture, stateManagement) {
-        this.projectPath = projectPath;
-        this.projectName = projectName;
-        this.orgIdentifier = orgIdentifier;
-        this.architecture = architecture;
-        this.stateManagement = stateManagement;
+    constructor(config) {
+        this.config = config;
     }
     async generate() {
         // Create basic Flutter project structure
         await this.createFlutterProject();
         // Create architecture-specific structure
-        if (this.architecture === 'Clean Architecture') {
-            await this.createCleanArchitectureStructure();
+        switch (this.config.architecture) {
+            case 'Clean Architecture':
+                await this.createCleanArchitectureStructure();
+                break;
+            case 'MVVM':
+                await this.createMVVMStructure();
+                break;
+            case 'Feature-First':
+                await this.createFeatureFirstStructure();
+                break;
+            case 'Basic':
+            default:
+                await this.createBasicStructure();
+                break;
         }
-        else {
-            await this.createMVVMStructure();
-        }
-        // Update pubspec.yaml
+        // Update pubspec.yaml with minimal dependencies
         await this.updatePubspec();
+        // Create main.dart with basic app structure
+        await this.createMainFile();
         // Create README
         await this.createReadme();
     }
@@ -45,20 +52,22 @@ class FlutterGenerator {
         }
     }
     async createFlutterProject() {
-        // Backup existing lib and test folders
-        await this.backupIfExists(path.join(this.projectPath, 'lib'));
-        await this.backupIfExists(path.join(this.projectPath, 'test'));
+        // Backup existing lib folder
+        await this.backupIfExists(path.join(this.config.projectPath, 'lib'));
         // Create basic folders
-        await fs.mkdir(path.join(this.projectPath, 'lib'), { recursive: true });
-        await fs.mkdir(path.join(this.projectPath, 'test'), { recursive: true });
-        // Create or update pubspec.yaml
-        const pubspecPath = path.join(this.projectPath, 'pubspec.yaml');
+        await fs.mkdir(path.join(this.config.projectPath, 'lib'), { recursive: true });
+        await fs.mkdir(path.join(this.config.projectPath, 'test'), { recursive: true });
+        await fs.mkdir(path.join(this.config.projectPath, 'assets'), { recursive: true });
+        await fs.mkdir(path.join(this.config.projectPath, 'assets/images'), { recursive: true });
+        await fs.mkdir(path.join(this.config.projectPath, 'assets/fonts'), { recursive: true });
+        // Create or update pubspec.yaml if it doesn't exist
+        const pubspecPath = path.join(this.config.projectPath, 'pubspec.yaml');
         try {
             await fs.access(pubspecPath);
             // Pubspec exists, skip creation
         }
         catch {
-            await fs.writeFile(pubspecPath, `name: ${this.projectName}
+            await fs.writeFile(pubspecPath, `name: ${this.config.projectName.toLowerCase().replace(/ /g, '_')}
 description: A new Flutter project.
 publish_to: 'none'
 version: 1.0.0+1
@@ -69,64 +78,84 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  cupertino_icons: ^1.0.5
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.2
+
+flutter:
+  uses-material-design: true
+  
+  # assets:
+  #   - assets/images/
+  
+  # fonts:
+  #   - family: Schyler
+  #     fonts:
+  #       - asset: assets/fonts/Schyler-Regular.ttf
+  #       - asset: assets/fonts/Schyler-Italic.ttf
+  #         style: italic
 `);
         }
     }
+    async createBasicStructure() {
+        const libPath = path.join(this.config.projectPath, 'lib');
+        // Create folder structure
+        const folders = [
+            'screens',
+            'widgets',
+            'utils',
+            'models',
+            'services'
+        ];
+        for (const folder of folders) {
+            const fullPath = path.join(libPath, folder);
+            await fs.mkdir(fullPath, { recursive: true });
+        }
+        // Create sample home screen scaffold
+        if (this.config.createSampleScreens) {
+            await this.createSampleHomeScreen('screens');
+        }
+    }
     async createCleanArchitectureStructure() {
-        const libPath = path.join(this.projectPath, 'lib');
-        const testPath = path.join(this.projectPath, 'test');
+        const libPath = path.join(this.config.projectPath, 'lib');
         // Create folder structure
         const folders = [
             'core/constants',
             'core/errors',
             'core/network',
-            'core/usecases',
             'core/utils',
             'core/widgets',
-            'features/auth/data/datasources/local',
-            'features/auth/data/datasources/remote',
-            'features/auth/data/models',
-            'features/auth/data/repositories',
-            'features/auth/domain/entities',
-            'features/auth/domain/repositories',
-            'features/auth/domain/usecases',
-            'features/auth/presentation/pages',
-            'features/auth/presentation/widgets',
+            'features/home/data/datasources',
+            'features/home/data/repositories',
+            'features/home/domain/entities',
+            'features/home/domain/repositories',
+            'features/home/domain/usecases',
+            'features/home/presentation/pages',
+            'features/home/presentation/widgets',
             'config/routes',
             'config/themes',
             'di'
         ];
         for (const folder of folders) {
             const fullPath = path.join(libPath, folder);
-            await this.backupIfExists(fullPath);
             await fs.mkdir(fullPath, { recursive: true });
         }
-        // Create test folders
-        const testFolders = [
-            'features/auth/data',
-            'features/auth/domain',
-            'features/auth/presentation',
-            'core'
-        ];
-        for (const folder of testFolders) {
-            const fullPath = path.join(testPath, folder);
-            await this.backupIfExists(fullPath);
-            await fs.mkdir(fullPath, { recursive: true });
-        }
-        // Create state management folders
-        if (this.stateManagement !== 'None/Add later') {
+        // Create state management folders if needed
+        if (this.config.stateManagement !== 'None/Add later') {
             const stateDir = this.getStateManagementDir();
-            const coreStatePath = path.join(libPath, `core/${stateDir}`);
-            const featureStatePath = path.join(libPath, `features/auth/presentation/${stateDir}`);
-            await this.backupIfExists(coreStatePath);
-            await this.backupIfExists(featureStatePath);
-            await fs.mkdir(coreStatePath, { recursive: true });
-            await fs.mkdir(featureStatePath, { recursive: true });
+            await fs.mkdir(path.join(libPath, `core/${stateDir}`), { recursive: true });
+            await fs.mkdir(path.join(libPath, `features/home/presentation/${stateDir}`), { recursive: true });
+        }
+        // Create sample home screen scaffold
+        if (this.config.createSampleScreens) {
+            await this.createSampleHomeScreen('features/home/presentation/pages');
         }
     }
     async createMVVMStructure() {
-        const libPath = path.join(this.projectPath, 'lib');
-        const testPath = path.join(this.projectPath, 'test');
+        const libPath = path.join(this.config.projectPath, 'lib');
         // Create folder structure
         const folders = [
             'models',
@@ -135,81 +164,174 @@ dependencies:
             'utils',
             'widgets',
             'config/themes',
-            'config/routes'
+            'config/routes',
+            'services'
         ];
         for (const folder of folders) {
             const fullPath = path.join(libPath, folder);
-            await this.backupIfExists(fullPath);
-            await fs.mkdir(fullPath, { recursive: true });
-        }
-        // Create test folders
-        const testFolders = ['models', 'view_models', 'views'];
-        for (const folder of testFolders) {
-            const fullPath = path.join(testPath, folder);
-            await this.backupIfExists(fullPath);
             await fs.mkdir(fullPath, { recursive: true });
         }
         // Create state management folders
-        if (this.stateManagement !== 'None/Add later') {
+        if (this.config.stateManagement !== 'None/Add later') {
             const stateDir = this.getStateManagementDir();
-            const statePath = path.join(libPath, `view_models/${stateDir}`);
-            await this.backupIfExists(statePath);
-            await fs.mkdir(statePath, { recursive: true });
+            await fs.mkdir(path.join(libPath, `view_models/${stateDir}`), { recursive: true });
+        }
+        // Create sample home screen scaffold
+        if (this.config.createSampleScreens) {
+            await this.createSampleHomeScreen('views');
         }
     }
+    async createFeatureFirstStructure() {
+        const libPath = path.join(this.config.projectPath, 'lib');
+        // Create folder structure
+        const folders = [
+            'core/utils',
+            'core/widgets',
+            'core/constants',
+            'core/services',
+            'core/theme',
+            'features/home/models',
+            'features/home/screens',
+            'features/home/widgets',
+            'features/home/services',
+            'routes'
+        ];
+        for (const folder of folders) {
+            const fullPath = path.join(libPath, folder);
+            await fs.mkdir(fullPath, { recursive: true });
+        }
+        // Create state management folders
+        if (this.config.stateManagement !== 'None/Add later') {
+            const stateDir = this.getStateManagementDir();
+            await fs.mkdir(path.join(libPath, `core/${stateDir}`), { recursive: true });
+            await fs.mkdir(path.join(libPath, `features/home/${stateDir}`), { recursive: true });
+        }
+        // Create sample home screen scaffold
+        if (this.config.createSampleScreens) {
+            await this.createSampleHomeScreen('features/home/screens');
+        }
+    }
+    async createMainFile() {
+        const mainPath = path.join(this.config.projectPath, 'lib', 'main.dart');
+        await fs.writeFile(mainPath, `import 'package:flutter/material.dart';
+
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: '${this.config.projectName}',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+        useMaterial3: true,
+      ),
+      home: const HomeScreen(),
+    );
+  }
+}
+
+class HomeScreen extends StatelessWidget {
+  const HomeScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('${this.config.projectName}'),
+      ),
+      body: const Center(
+        child: Text('Welcome to ${this.config.projectName}'),
+      ),
+    );
+  }
+}
+`);
+    }
+    async createSampleHomeScreen(baseDir) {
+        const screenPath = path.join(this.config.projectPath, 'lib', baseDir, 'home_screen.dart');
+        await fs.writeFile(screenPath, `import 'package:flutter/material.dart';
+
+class HomeScreen extends StatelessWidget {
+  const HomeScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Home'),
+      ),
+      body: const Center(
+        child: Text('Home Screen'),
+      ),
+    );
+  }
+}
+`);
+    }
     async updatePubspec() {
-        const dependencies = this.getDependencies();
-        const pubspecPath = path.join(this.projectPath, 'pubspec.yaml');
+        const stateManagementDeps = this.getStateManagementDependencies();
+        if (stateManagementDeps.length === 0) {
+            return; // No need to update if no additional dependencies
+        }
+        const pubspecPath = path.join(this.config.projectPath, 'pubspec.yaml');
         let pubspecContent;
         try {
             pubspecContent = await fs.readFile(pubspecPath, 'utf8');
         }
         catch {
-            pubspecContent = '';
+            return; // Can't read pubspec, skip updating
         }
-        // Append dependencies if not already present
-        const dependencyLines = dependencies.map(dep => `  ${dep}`).join('\n');
+        // Add only state management dependencies
+        const dependencyLines = stateManagementDeps.map(dep => `  ${dep}`).join('\n');
         if (!pubspecContent.includes('dependencies:')) {
             pubspecContent += `\ndependencies:\n${dependencyLines}\n`;
         }
         else {
-            // Add new dependencies under existing dependencies section
+            // Append dependencies to existing section
             const lines = pubspecContent.split('\n');
-            const depIndex = lines.findIndex(line => line.trim() === 'dependencies:');
-            lines.splice(depIndex + 1, 0, ...dependencyLines.split('\n'));
-            pubspecContent = lines.join('\n');
+            let inDep = false;
+            let depIndex = -1;
+            for (let i = 0; i < lines.length; i++) {
+                if (lines[i].trim() === 'dependencies:') {
+                    inDep = true;
+                    depIndex = i;
+                    continue;
+                }
+                if (inDep && lines[i].match(/^\S/)) {
+                    // Found end of dependencies section
+                    lines.splice(i, 0, dependencyLines);
+                    pubspecContent = lines.join('\n');
+                    await fs.writeFile(pubspecPath, pubspecContent);
+                    return;
+                }
+            }
+            // If we get here, append to end of dependencies section
+            if (depIndex !== -1) {
+                lines.splice(depIndex + 1, 0, dependencyLines);
+                pubspecContent = lines.join('\n');
+            }
         }
         await fs.writeFile(pubspecPath, pubspecContent);
     }
     async createReadme() {
-        const stateDir = this.getStateManagementDir();
-        const readmePath = path.join(this.projectPath, 'README.md');
-        await this.backupIfExists(readmePath);
-        const readmeContent = `# ${this.projectName}
+        const readmePath = path.join(this.config.projectPath, 'README.md');
+        const architectureDesc = this.getArchitectureDescription();
+        const readmeContent = `# ${this.config.projectName}
 
-A Flutter project using ${this.architecture} architecture.
+A Flutter project using ${this.config.architecture} architecture.
 
 ## Project Structure
 
-${this.architecture === 'Clean Architecture' ?
-            `The project follows Clean Architecture:
-- \`lib/core/\`: Core utilities
-- \`lib/features/\`: Feature-specific code
-- \`lib/config/\`: App configuration
-- \`lib/di/\`: Dependency injection`
-            :
-                `The project follows MVVM architecture:
-- \`lib/models/\`: Data models
-- \`lib/view_models/\`: Business logic
-- \`lib/views/\`: UI screens
-- \`lib/utils/\`: Utilities
-- \`lib/widgets/\`: Reusable widgets
-- \`lib/config/\`: App configuration`}
+${architectureDesc}
 
-State management: ${this.stateManagement}
-Located in: ${this.architecture === 'Clean Architecture' ?
-            `\`lib/features/**/presentation/${stateDir}\`` :
-            `\`lib/view_models/${stateDir}\``}
+${this.config.stateManagement !== 'None/Add later' ?
+            `State management: ${this.config.stateManagement}` :
+            'No state management library selected yet.'}
 
 ## Getting Started
 
@@ -218,34 +340,75 @@ Located in: ${this.architecture === 'Clean Architecture' ?
 `;
         await fs.writeFile(readmePath, readmeContent);
     }
+    getArchitectureDescription() {
+        switch (this.config.architecture) {
+            case 'Clean Architecture':
+                return `The project follows Clean Architecture principles:
+- \`lib/core/\`: Core utilities and shared components
+- \`lib/features/\`: Feature-specific code organized in layers
+  - \`data/\`: Data sources and repositories implementations
+  - \`domain/\`: Business logic, entities and repository interfaces
+  - \`presentation/\`: UI components and state management
+- \`lib/config/\`: App configuration and routing
+- \`lib/di/\`: Dependency injection`;
+            case 'MVVM':
+                return `The project follows MVVM architecture:
+- \`lib/models/\`: Data models
+- \`lib/view_models/\`: Business logic and state management
+- \`lib/views/\`: UI screens and components
+- \`lib/utils/\`: Utility functions and helpers
+- \`lib/services/\`: Services for external data sources
+- \`lib/config/\`: App configuration and routing`;
+            case 'Feature-First':
+                return `The project is organized by features:
+- \`lib/core/\`: Shared utilities and components
+- \`lib/features/\`: Feature modules
+  - Each feature contains its own models, screens, widgets and services
+- \`lib/routes/\`: App routing`;
+            case 'Basic':
+            default:
+                return `The project has a simple, straightforward structure:
+- \`lib/screens/\`: UI screens
+- \`lib/widgets/\`: Reusable UI components
+- \`lib/models/\`: Data models
+- \`lib/services/\`: Services for business logic
+- \`lib/utils/\`: Utility functions and helpers`;
+        }
+    }
     getStateManagementDir() {
-        switch (this.stateManagement) {
+        switch (this.config.stateManagement) {
             case 'BLoC':
+            case 'Cubit':
                 return 'bloc';
             case 'Riverpod':
             case 'Provider':
                 return 'providers';
             case 'GetX':
                 return 'controllers';
-            default:
+            case 'MobX':
+                return 'stores';
+            case 'None/Add later':
                 return 'none';
+            default:
+                return 'state';
         }
     }
-    getDependencies() {
-        const baseDependencies = this.architecture === 'Clean Architecture' ?
-            ['dartz: ^0.10.1', 'equatable: ^2.0.5', 'http: ^0.13.5', 'shared_preferences: ^2.0.15'] :
-            ['equatable: ^2.0.5', 'http: ^0.13.5', 'shared_preferences: ^2.0.15'];
-        switch (this.stateManagement) {
+    getStateManagementDependencies() {
+        switch (this.config.stateManagement) {
             case 'BLoC':
-                return [...baseDependencies, 'bloc: ^8.1.0', 'flutter_bloc: ^8.1.0'];
+                return ['bloc: ^8.1.0', 'flutter_bloc: ^8.1.0'];
+            case 'Cubit':
+                return ['bloc: ^8.1.0', 'flutter_bloc: ^8.1.0'];
             case 'Riverpod':
-                return [...baseDependencies, 'flutter_riverpod: ^2.3.0', 'riverpod_annotation: ^2.2.0'];
+                return ['flutter_riverpod: ^2.3.0'];
             case 'GetX':
-                return [...baseDependencies, 'get: ^4.6.5'];
+                return ['get: ^4.6.5'];
             case 'Provider':
-                return [...baseDependencies, 'provider: ^6.1.1'];
+                return ['provider: ^6.1.1'];
+            case 'MobX':
+                return ['mobx: ^2.2.0', 'flutter_mobx: ^2.0.6+5', 'mobx_codegen: ^2.3.0'];
             default:
-                return baseDependencies;
+                return [];
         }
     }
 }
