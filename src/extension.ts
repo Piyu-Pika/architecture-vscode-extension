@@ -8,6 +8,7 @@ import { ReactGenerator } from './generators/reactGenerator';
 import { FlutterArchitecture, FlutterStateManagement, ProjectType } from './generators/types';
 import { DjangoGenerator } from './generators/djangoGenerator';
 import { NextjsGenerator } from './generators/nextjsGenerator';
+import { CMakeGenerator } from './generators/cmakeGenerator';
 
 export function activate(context: vscode.ExtensionContext) {
     let disposable = vscode.commands.registerCommand('codearchitect.generate', async () => {
@@ -120,6 +121,10 @@ export function activate(context: vscode.ExtensionContext) {
                 case 'React':
                     const reactGenerator = new ReactGenerator(projectPath, projectName);
                     await reactGenerator.generate();
+                    break;
+                case 'CMake':
+                    const cmakeGenerator = new CMakeGenerator(projectPath, projectName);
+                    await cmakeGenerator.generate();
                     break;
             }
 

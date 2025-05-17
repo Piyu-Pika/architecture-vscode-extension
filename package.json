@@ -26,7 +26,7 @@
   "bugs": {
     "url": "https://github.com/Piyu-Pika/architecture-vscode-extension/issues"
   },
-  "license": "MIT",
+  "license": "CC BY-NC",
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
