@@ -16,6 +16,7 @@ class NodejsGenerator {
             'src/api/routes',
             'src/api/services',
             'src/api/validators',
+            'src/api/models',
             'src/config',
             'src/db/models',
             'src/db/migrations',
@@ -104,6 +105,7 @@ A Node.js application with organized structure.
 │   ├── api/
 │   │   ├── controllers/
 │   │   ├── middlewares/
+│   │   ├── models/
 │   │   ├── routes/
 │   │   ├── services/
 │   │   ├── validators/

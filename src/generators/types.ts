@@ -9,7 +9,7 @@ export enum FlutterStateManagement {
     Cubit = 'Cubit',
     None = 'None/Add later'
 }
-// export type  GoFramework = 'Gin' | 'Echo' | 'Fiber' | 'chi'|'Gin-Gorilla' | 'Echo-Gorilla' | 'Chi-Gorilla'| 'None/Add later';
+export type GoFramework = 'Gin' | 'Echo' | 'Fiber' | 'Chi' | 'None';
 // export type NodejsFramework = 'Express' | 'Koa' | 'NestJS' | 'Fastify' | 'Hapi' | 'None/Add later';
 // export type RustFramework = 'Actix' | 'Axum' | 'Warp' | 'None/Add later';
 
@@ -18,4 +18,6 @@ export enum FlutterStateManagement {
 export interface ProjectConfig {
     projectPath: string;
     projectName: string;
+    goFramework?: GoFramework;
+    githubUsername?: string;
 }

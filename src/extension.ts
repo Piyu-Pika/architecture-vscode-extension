@@ -5,7 +5,7 @@ import { NodejsGenerator } from './generators/nodejsGenerator';
 import { FastapiGenerator } from './generators/fastapiGenerator';
 import { RustGenerator } from './generators/rustGenerator';
 import { ReactGenerator } from './generators/reactGenerator';
-import { FlutterStateManagement, ProjectType } from './generators/types';
+import { FlutterStateManagement, GoFramework, ProjectType } from './generators/types';
 import { FlutterArchitecture } from './generators/flutterGenerator';
 import { DjangoGenerator } from './generators/djangoGenerator';
 import { NextjsGenerator } from './generators/nextjsGenerator';
@@ -44,7 +44,7 @@ export function activate(context: vscode.ExtensionContext) {
 
         // For Flutter, get organization identifier
         let orgIdentifier = 'com.example';
-        if (projectType === 'Flutter') {
+        if (projectType === 'Flutter(Dart)') {
             const inputOrg = await vscode.window.showInputBox({
                 prompt: 'Enter organization identifier (e.g., com.example)',
                 value: orgIdentifier
@@ -52,6 +52,44 @@ export function activate(context: vscode.ExtensionContext) {
 
             if (inputOrg) {
                 orgIdentifier = inputOrg;
+            }
+        }
+        
+        // For Go, get GitHub username or full module path
+        let githubUsername = '';
+        if (projectType === 'Go') {
+            const userInput = await vscode.window.showInputBox({
+                prompt: 'Enter GitHub username or full module path (e.g., username or github.com/username)',
+                placeHolder: 'username or github.com/username',
+                validateInput: (value) => value.trim() ? null : 'Input cannot be empty'
+            }) || '';
+            
+            if (!userInput) {
+                return;
+            }
+            
+            // Process the input - extract username from full path if needed
+            if (userInput.includes('github.com/')) {
+                // Extract username from full path (github.com/username/projectname or github.com/username)
+                const parts = userInput.split('/');
+                if (parts.length >= 2) {
+                    // Get the part after github.com
+                    const usernameIndex = parts.findIndex(part => 
+                        part === 'github.com' || part === 'github.com:') + 1;
+                    
+                    if (usernameIndex > 0 && usernameIndex < parts.length) {
+                        githubUsername = parts[usernameIndex];
+                    }
+                }
+            } else {
+                // User just entered the username
+                githubUsername = userInput.trim();
+            }
+            
+            // Validate we have a username
+            if (!githubUsername) {
+                vscode.window.showErrorMessage('Could not extract a valid GitHub username from input');
+                return;
             }
         }
 
@@ -108,21 +146,35 @@ export function activate(context: vscode.ExtensionContext) {
                 break;
 
                 case 'Go':
-                    const goGenerator = new GoGenerator(projectPath, projectName);
+                const goFramework = await vscode.window.showQuickPick(
+                    ['Gin', 'Echo', 'Fiber', 'Chi', 'None'],
+                    { placeHolder: 'Select Go framework' }
+                );      
+
+                if (!goFramework) {
+                    return;
+                }   
+
+                 const goGenerator = new GoGenerator({
+                      projectPath,
+                      projectName,
+                      goFramework: goFramework as GoFramework,
+                      githubUsername
+                  });
                     await goGenerator.generate();
                     break;
 
-                case 'Node.js':
+                case 'Node.js(JavaScript)':
                     const nodejsGenerator = new NodejsGenerator(projectPath, projectName);
                     await nodejsGenerator.generate();
                     break;
 
-                case 'FastAPI':
+                case 'FastAPI(Python)':
                     const fastapiGenerator = new FastapiGenerator(projectPath, projectName);
                     await fastapiGenerator.generate();
                     break;
 
-                case 'Django':
+                case 'Django(Python)':
                     const djangoGenerator = new DjangoGenerator(projectPath, projectName);
                     await djangoGenerator.generate();
                     break;
@@ -132,16 +184,16 @@ export function activate(context: vscode.ExtensionContext) {
                     await rustGenerator.generate();
                     break;
 
-                case 'Next.js':
+                case 'Next.js(JavaScript)':
                     const nextjsGenerator = new NextjsGenerator(projectPath, projectName);
                     await nextjsGenerator.generate();
                     break;
 
-                case 'React':
+                case 'React(JavaScript)':
                     const reactGenerator = new ReactGenerator(projectPath, projectName);
                     await reactGenerator.generate();
                     break;
-                case 'CMake':
+                case 'CMake(C++)':
                     const cmakeGenerator = new CMakeGenerator(projectPath, projectName);
                     await cmakeGenerator.generate();
                     break;

@@ -22,6 +22,8 @@ class FlutterGenerator {
                 await this.createFeatureFirstStructure();
                 break;
             case 'Basic':
+                await this.createBasicStructure();
+                break;
             default:
                 await this.createBasicStructure();
                 break;

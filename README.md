@@ -18,11 +18,6 @@ A VS Code extension to generate project folder structures for various frameworks
 - 🛠️ Customizable project name and organization identifier (for Flutter)
 - 💾 Automatic backup of existing conflicting files or folders
 
-## Demo Video
-<video controls width="100%">
-      <source src="assets/demo.mp4" type="video/mp4">
-      Your browser does not support the video tag. You can download the video <a href="assets/demo.mp4">here</a>.
-</video>
 
 ## 🚀 Usage
 

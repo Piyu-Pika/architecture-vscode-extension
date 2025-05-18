@@ -4,14 +4,14 @@ exports.GoGenerator = void 0;
 const fs = require("fs/promises");
 const path = require("path");
 class GoGenerator {
-    constructor(projectPath, projectName) {
-        this.projectPath = projectPath;
-        this.projectName = projectName;
+    constructor(config) {
+        this.config = config;
     }
     async generate() {
+        const { projectPath, projectName, goFramework } = this.config;
         // Create directory structure
         const folders = [
-            `cmd/${this.projectName}`,
+            `cmd/${projectName}`,
             'internal/config',
             'internal/handlers',
             'internal/models',
@@ -25,18 +25,21 @@ class GoGenerator {
             'docs'
         ];
         for (const folder of folders) {
-            const fullPath = path.join(this.projectPath, folder);
+            const fullPath = path.join(projectPath, folder);
             await this.backupIfExists(fullPath);
             await fs.mkdir(fullPath, { recursive: true });
         }
-        // Create main.go
-        const mainPath = path.join(this.projectPath, `cmd/${this.projectName}/main.go`);
+        // Create main.go with framework-specific initialization
+        const mainPath = path.join(projectPath, `cmd/${projectName}/main.go`);
         await this.backupIfExists(mainPath);
-        await fs.writeFile(mainPath, `package main\n\nfunc main() {\n    // Application entry point\n}\n`);
+        const mainContent = this.generateMainContent(goFramework || 'None');
+        await fs.writeFile(mainPath, mainContent);
+        // Create go.mod
+        await this.createGoMod();
         // Create README
         await this.createReadme();
         // Create .gitignore
-        const gitignorePath = path.join(this.projectPath, '.gitignore');
+        const gitignorePath = path.join(projectPath, '.gitignore');
         await this.backupIfExists(gitignorePath);
         await fs.writeFile(gitignorePath, `# Binaries
 *.exe
@@ -64,6 +67,117 @@ go.work
 .DS_Store
 `);
     }
+    generateMainContent(framework) {
+        switch (framework) {
+            case 'Gin':
+                return `package main
+
+import (
+    "github.com/gin-gonic/gin"
+)
+
+func main() {
+    r := gin.Default()
+    r.GET("/ping", func(c *gin.Context) {
+        c.JSON(200, gin.H{
+            "message": "pong",
+        })
+    })
+    r.Run() // listen and serve on 0.0.0.0:8080
+}
+`;
+            case 'Echo':
+                return `package main
+
+import (
+    "github.com/labstack/echo/v4"
+    "net/http"
+)
+
+func main() {
+    e := echo.New()
+    e.GET("/ping", func(c echo.Context) error {
+        return c.JSON(http.StatusOK, map[string]string{
+            "message": "pong",
+        })
+    })
+    e.Logger.Fatal(e.Start(":8080"))
+}
+`;
+            case 'Fiber':
+                return `package main
+
+import (
+    "github.com/gofiber/fiber/v2"
+)
+
+func main() {
+    app := fiber.New()
+    app.Get("/ping", func(c *fiber.Ctx) error {
+        return c.JSON(fiber.Map{
+            "message": "pong",
+        })
+    })
+    app.Listen(":8080")
+}
+`;
+            case 'Chi':
+                return `package main
+
+import (
+    "github.com/go-chi/chi/v5"
+    "net/http"
+)
+
+func main() {
+    r := chi.NewRouter()
+    r.Get("/ping", func(w http.ResponseWriter, r *http.Request) {
+        w.Header().Set("Content-Type", "application/json")
+        w.Write([]byte(\`{"message":"pong"}\`))
+    })
+    http.ListenAndServe(":8080", r)
+}
+`;
+            case 'None':
+            default:
+                return `package main\n\nfunc main() {\n    // Application entry point\n}\n`;
+        }
+    }
+    async createGoMod() {
+        const { projectPath, projectName, goFramework, githubUsername } = this.config;
+        const goModPath = path.join(projectPath, 'go.mod');
+        await this.backupIfExists(goModPath);
+        // Sanitize inputs for module path construction
+        const sanitizedUsername = githubUsername?.trim().replace(/[^a-zA-Z0-9_-]/g, '') || '';
+        const sanitizedProjectName = projectName.trim().replace(/[^a-zA-Z0-9_-]/g, '');
+        // Construct module name - ensure it's properly formatted
+        const moduleName = sanitizedUsername
+            ? `github.com/${sanitizedUsername}/${sanitizedProjectName}`
+            : sanitizedProjectName;
+        let dependencies = '';
+        switch (goFramework) {
+            case 'Gin':
+                dependencies = `    github.com/gin-gonic/gin v1.9.1\n`;
+                break;
+            case 'Echo':
+                dependencies = `    github.com/labstack/echo/v4 v4.11.1\n`;
+                break;
+            case 'Fiber':
+                dependencies = `    github.com/gofiber/fiber/v2 v2.52.0\n`;
+                break;
+            case 'Chi':
+                dependencies = `    github.com/go-chi/chi/v5 v5.0.10\n`;
+                break;
+        }
+        const content = `module ${moduleName}
+
+go 1.21
+
+require (
+${dependencies})
+`;
+        await fs.writeFile(goModPath, content);
+    }
     async backupIfExists(filePath) {
         try {
             await fs.access(filePath);
@@ -82,17 +196,34 @@ go.work
         }
     }
     async createReadme() {
-        const readmePath = path.join(this.projectPath, 'README.md');
+        const { projectPath, projectName, goFramework, githubUsername } = this.config;
+        const readmePath = path.join(projectPath, 'README.md');
         await this.backupIfExists(readmePath);
-        const content = `# ${this.projectName}
+        // Sanitize inputs for module path construction
+        const sanitizedUsername = githubUsername?.trim().replace(/[^a-zA-Z0-9_-]/g, '') || '';
+        const sanitizedProjectName = projectName.trim().replace(/[^a-zA-Z0-9_-]/g, '');
+        // Construct module name - ensure it's properly formatted
+        const moduleName = sanitizedUsername
+            ? `github.com/${sanitizedUsername}/${sanitizedProjectName}`
+            : sanitizedProjectName;
+        const frameworkNote = goFramework !== 'None'
+            ? `This project uses ${goFramework} as the web framework.`
+            : 'No web framework is currently configured.';
+        const content = `# ${projectName}
 
 A Go project with a clean structure.
+
+## Module
+\`${moduleName}\`
+
+## Framework
+${frameworkNote}
 
 ## Project Structure
 
 \`\`\`
 ├── cmd/
-│   └── ${this.projectName}/    # Main entry point
+│   └── ${projectName}/    # Main entry point
 ├── configs/            # Configuration files
 ├── docs/               # Documentation
 ├── internal/           # Private code
@@ -109,8 +240,14 @@ A Go project with a clean structure.
 
 ## Getting Started
 
+1. Install dependencies:
 \`\`\`bash
-go run cmd/${this.projectName}/main.go
+go mod tidy
+\`\`\`
+
+2. Run the application:
+\`\`\`bash
+go run cmd/${projectName}/main.go
 \`\`\`
 `;
         await fs.writeFile(readmePath, content);
