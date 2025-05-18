@@ -10,6 +10,9 @@ import { FlutterArchitecture } from './generators/flutterGenerator';
 import { DjangoGenerator } from './generators/djangoGenerator';
 import { NextjsGenerator } from './generators/nextjsGenerator';
 import { CMakeGenerator } from './generators/cmakeGenerator';
+import { AngularGenerator } from './generators/angularGenerator';
+import { VueGenerator } from './generators/vueGenerator';
+import { SpringBootGenerator } from './generators/springbootGenerator';
 
 export function activate(context: vscode.ExtensionContext) {
     let disposable = vscode.commands.registerCommand('codearchitect.generate', async () => {
@@ -24,7 +27,7 @@ export function activate(context: vscode.ExtensionContext) {
 
         // Select project type
         const projectType = await vscode.window.showQuickPick(
-            ['Flutter(Dart)', 'Go', 'Node.js(JavaScript)', 'FastAPI(Python)', 'Django(Python)', 'Rust', 'Next.js(JavaScript)', 'React(JavaScript)', 'CMake(C++)'],
+            ['Flutter(Dart)', 'Go', 'Node.js(JavaScript)', 'FastAPI(Python)', 'Django(Python)', 'Rust', 'Next.js(JavaScript)', 'React(JavaScript)', 'CMake(C++)','Angular', 'Vue'],
             { placeHolder: 'Select project type' }
         );
 
@@ -196,6 +199,19 @@ export function activate(context: vscode.ExtensionContext) {
                 case 'CMake(C++)':
                     const cmakeGenerator = new CMakeGenerator(projectPath, projectName);
                     await cmakeGenerator.generate();
+                    break;
+                case 'Angular':
+                    const angularGenerator = new AngularGenerator(projectPath, projectName);
+                    await angularGenerator.generate();
+                    break;
+    
+                case 'Vue':
+                    const vueGenerator = new VueGenerator(projectPath, projectName);
+                    await vueGenerator.generate();
+                    break;
+                case 'Spring Boot':
+                    const springBootGenerator = new SpringBootGenerator(projectPath, projectName);
+                    await springBootGenerator.generate();
                     break;
             }
 

@@ -14,9 +14,16 @@ A VS Code extension to generate project folder structures for various frameworks
      - ⚛️ React
      - ▲ Next.js
      - 🔨 CMake (C++ project with tests)
+     - 🏗️ Angular(TypeScript with standard Angular CLI structure)
+     - 🎨 Vue(TypeScript with standard Vue CLI structure)
+     - 🚛 Spring Boot(Java with standard Spring Boot structure)
+     
 - 🎯 Interactive UI through VS Code command palette
 - 🛠️ Customizable project name and organization identifier (for Flutter)
 - 💾 Automatic backup of existing conflicting files or folders
+- 🧠 Smart GitHub module path generation for Go projects
+- 📝 README.md generation for Go projects
+- much more to come...
 
 
 ## 🚀 Usage
