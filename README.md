@@ -22,7 +22,7 @@ A VS Code extension to generate project folder structures for various frameworks
 - 🛠️ Customizable project name and organization identifier (for Flutter)
 - 💾 Automatic backup of existing conflicting files or folders
 - 🧠 Smart GitHub module path generation for Go projects
-- 📝 README.md generation for Go projects
+- 📝 README.md generation for All projects
 - much more to come...
 
 
