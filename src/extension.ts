@@ -13,6 +13,7 @@ import { CMakeGenerator } from './generators/cmakeGenerator';
 import { AngularGenerator } from './generators/angularGenerator';
 import { VueGenerator } from './generators/vueGenerator';
 import { SpringBootGenerator } from './generators/springbootGenerator';
+import { KotlinGenerator } from './generators/kotlinGenerator';
 
 export function activate(context: vscode.ExtensionContext) {
     let disposable = vscode.commands.registerCommand('codearchitect.generate', async () => {
@@ -225,6 +226,10 @@ export function activate(context: vscode.ExtensionContext) {
                 case 'Spring Boot':
                     const springBootGenerator = new SpringBootGenerator(projectPath, projectName);
                     await springBootGenerator.generate();
+                    break;
+                case 'Kotlin':
+                    const kotlinGenerator = new KotlinGenerator(projectPath, projectName);
+                    await kotlinGenerator.generate();
                     break;
             }
 

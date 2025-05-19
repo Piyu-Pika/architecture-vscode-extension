@@ -45,5 +45,6 @@
       "@types/node": "^20.14.10",
       "@types/vscode": "^1.85.0",
       "typescript": "^5.5.3"
-    }
+    },
+    "json.schemaDownload.enable": false
   }
