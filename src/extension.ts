@@ -14,6 +14,7 @@ import { AngularGenerator } from './generators/angularGenerator';
 import { VueGenerator } from './generators/vueGenerator';
 import { SpringBootGenerator } from './generators/springbootGenerator';
 import { KotlinGenerator } from './generators/kotlinGenerator';
+import { DependencyInstallerFactory } from './dependancyInstall';
 
 export function activate(context: vscode.ExtensionContext) {
     let disposable = vscode.commands.registerCommand('codearchitect.generate', async () => {
@@ -28,7 +29,7 @@ export function activate(context: vscode.ExtensionContext) {
 
         // Select project type
         const projectType = await vscode.window.showQuickPick(
-            ['Flutter(Dart)', 'Go', 'Node.js(JavaScript)', 'FastAPI(Python)', 'Django(Python)', 'Rust', 'Next.js(JavaScript)', 'React(JavaScript)', 'CMake(C++)','Angular', 'Vue', 'Spring Boot'],
+            ['Flutter(Dart)', 'Go', 'Node.js(JavaScript)', 'FastAPI(Python)', 'Django(Python)', 'Rust', 'Next.js(JavaScript)', 'React(JavaScript)', 'CMake(C++)', 'Angular', 'Vue', 'Spring Boot', 'Kotlin'],
             { placeHolder: 'Select project type' }
         );
 
@@ -97,7 +98,17 @@ export function activate(context: vscode.ExtensionContext) {
             }
         }
 
+        // Ask if user wants to install dependencies after generation
+        const installDeps = await vscode.window.showQuickPick(
+            ['Yes', 'No'],
+            { placeHolder: 'Install dependencies after generating project?' }
+        );
+
+        const shouldInstallDependencies = installDeps === 'Yes';
+
         try {
+            let projectGenerated = false;
+
             switch (projectType) {
             case 'Flutter(Dart)':
                 // For Flutter, select architecture with new options
@@ -145,6 +156,7 @@ export function activate(context: vscode.ExtensionContext) {
                 // Initialize and run the generator with the new configuration
                 const flutterGenerator = new FlutterGenerator(config);
                 await flutterGenerator.generate();
+                projectGenerated = true;
 
                 vscode.window.showInformationMessage(`Flutter project created with ${architecture} architecture and ${stateManagement} state management.`);
                 break;
@@ -166,6 +178,7 @@ export function activate(context: vscode.ExtensionContext) {
                       githubUsername
                   });
                     await goGenerator.generate();
+                    projectGenerated = true;
                     break;
 
                 case 'Node.js(JavaScript)':
@@ -184,56 +197,89 @@ export function activate(context: vscode.ExtensionContext) {
                         nodeFramework: nodeFramework as NodejsFramework
                     });
                     await nodejsGenerator.generate();
+                    projectGenerated = true;
                     break;
 
                 case 'FastAPI(Python)':
                     const fastapiGenerator = new FastapiGenerator(projectPath, projectName);
                     await fastapiGenerator.generate();
+                    projectGenerated = true;
                     break;
 
                 case 'Django(Python)':
                     const djangoGenerator = new DjangoGenerator(projectPath, projectName);
                     await djangoGenerator.generate();
+                    projectGenerated = true;
                     break;
 
                 case 'Rust':
                     const rustGenerator = new RustGenerator(projectPath, projectName);
                     await rustGenerator.generate();
+                    projectGenerated = true;
                     break;
 
                 case 'Next.js(JavaScript)':
                     const nextjsGenerator = new NextjsGenerator(projectPath, projectName);
                     await nextjsGenerator.generate();
+                    projectGenerated = true;
                     break;
 
                 case 'React(JavaScript)':
                     const reactGenerator = new ReactGenerator(projectPath, projectName);
                     await reactGenerator.generate();
+                    projectGenerated = true;
                     break;
+                    
                 case 'CMake(C++)':
                     const cmakeGenerator = new CMakeGenerator(projectPath, projectName);
                     await cmakeGenerator.generate();
+                    projectGenerated = true;
                     break;
+                    
                 case 'Angular':
                     const angularGenerator = new AngularGenerator(projectPath, projectName);
                     await angularGenerator.generate();
+                    projectGenerated = true;
                     break;
     
                 case 'Vue':
                     const vueGenerator = new VueGenerator(projectPath, projectName);
                     await vueGenerator.generate();
+                    projectGenerated = true;
                     break;
+                    
                 case 'Spring Boot':
                     const springBootGenerator = new SpringBootGenerator(projectPath, projectName);
                     await springBootGenerator.generate();
+                    projectGenerated = true;
                     break;
+                    
                 case 'Kotlin':
                     const kotlinGenerator = new KotlinGenerator(projectPath, projectName);
                     await kotlinGenerator.generate();
+                    projectGenerated = true;
                     break;
             }
 
-            vscode.window.showInformationMessage(`Project structure for ${projectName} created successfully in workspace root!`);
+            if (projectGenerated) {
+                vscode.window.showInformationMessage(`Project structure for ${projectName} created successfully in workspace root!`);
+                
+                // Install dependencies if requested
+                if (shouldInstallDependencies) {
+                    try {
+                        // Show a status message
+                        vscode.window.showInformationMessage(`Installing dependencies for ${projectName}...`);
+                        
+                        // Get the appropriate installer and run it
+                        const installer = DependencyInstallerFactory.getInstaller(projectType as ProjectType);
+                        await installer.installDependencies(projectPath, projectName);
+                        
+                        vscode.window.showInformationMessage(`Dependencies installed successfully for ${projectName}!`);
+                    } catch (error) {
+                        vscode.window.showErrorMessage(`Failed to install dependencies: ${error}`);
+                    }
+                }
+            }
         } catch (error) {
             vscode.window.showErrorMessage(`Failed to create project structure: ${error}`);
         }

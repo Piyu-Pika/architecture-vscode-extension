@@ -1,6 +1,6 @@
 # 🏗️ CodeArchitect
 
-A VS Code extension to generate project folder structures for various frameworks and languages, including Flutter, Go, Node.js, FastAPI, Django, Rust, React, CMake, and Next.js.
+A VS Code extension to generate project folder structures for various frameworks and languages, including Flutter, Go, Node.js, FastAPI, Django, Rust, React, CMake, Next.js, Angular, Vue, Spring Boot, and more.
 
 ## ✨ Features
 
@@ -24,6 +24,7 @@ A VS Code extension to generate project folder structures for various frameworks
 - 💾 Automatic backup of existing conflicting files or folders
 - 🧠 Smart GitHub module path generation for Go projects
 - 📝 README.md generation for All projects
+-    Auto Dependencies installation for all frameworks
 - much more to come...
 
 

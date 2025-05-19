@@ -18,7 +18,7 @@ class AngularGenerator {
                 'src/app/services',
                 'src/app/models',
                 'src/app/shared',
-                'src/app/pages/home', // Ensure the home subdirectory exists
+                'src/app/pages/home',
                 'src/app/guards',
                 'src/assets/images',
                 'src/assets/styles',
