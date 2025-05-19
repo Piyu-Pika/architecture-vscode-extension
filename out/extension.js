@@ -12,6 +12,9 @@ const reactGenerator_1 = require("./generators/reactGenerator");
 const djangoGenerator_1 = require("./generators/djangoGenerator");
 const nextjsGenerator_1 = require("./generators/nextjsGenerator");
 const cmakeGenerator_1 = require("./generators/cmakeGenerator");
+const angularGenerator_1 = require("./generators/angularGenerator");
+const vueGenerator_1 = require("./generators/vueGenerator");
+const springbootGenerator_1 = require("./generators/springbootGenerator");
 function activate(context) {
     let disposable = vscode.commands.registerCommand('codearchitect.generate', async () => {
         // Get workspace folder
@@ -22,7 +25,7 @@ function activate(context) {
         }
         const projectPath = workspaceFolders[0].uri.fsPath;
         // Select project type
-        const projectType = await vscode.window.showQuickPick(['Flutter(Dart)', 'Go', 'Node.js(JavaScript)', 'FastAPI(Python)', 'Django(Python)', 'Rust', 'Next.js(JavaScript)', 'React(JavaScript)', 'CMake(C++)'], { placeHolder: 'Select project type' });
+        const projectType = await vscode.window.showQuickPick(['Flutter(Dart)', 'Go', 'Node.js(JavaScript)', 'FastAPI(Python)', 'Django(Python)', 'Rust', 'Next.js(JavaScript)', 'React(JavaScript)', 'CMake(C++)', 'Angular', 'Vue', 'Spring Boot'], { placeHolder: 'Select project type' });
         if (!projectType) {
             return;
         }
@@ -125,7 +128,15 @@ function activate(context) {
                     await goGenerator.generate();
                     break;
                 case 'Node.js(JavaScript)':
-                    const nodejsGenerator = new nodejsGenerator_1.NodejsGenerator(projectPath, projectName);
+                    const nodeFramework = await vscode.window.showQuickPick(['Express', 'Koa', 'NestJS', 'Fastify', 'Hapi', 'None/Add later'], { placeHolder: 'Select Node.js framework' });
+                    if (!nodeFramework) {
+                        return;
+                    }
+                    const nodejsGenerator = new nodejsGenerator_1.NodejsGenerator({
+                        projectPath,
+                        projectName,
+                        nodeFramework: nodeFramework
+                    });
                     await nodejsGenerator.generate();
                     break;
                 case 'FastAPI(Python)':
@@ -151,6 +162,18 @@ function activate(context) {
                 case 'CMake(C++)':
                     const cmakeGenerator = new cmakeGenerator_1.CMakeGenerator(projectPath, projectName);
                     await cmakeGenerator.generate();
+                    break;
+                case 'Angular':
+                    const angularGenerator = new angularGenerator_1.AngularGenerator(projectPath, projectName);
+                    await angularGenerator.generate();
+                    break;
+                case 'Vue':
+                    const vueGenerator = new vueGenerator_1.VueGenerator(projectPath, projectName);
+                    await vueGenerator.generate();
+                    break;
+                case 'Spring Boot':
+                    const springBootGenerator = new springbootGenerator_1.SpringBootGenerator(projectPath, projectName);
+                    await springBootGenerator.generate();
                     break;
             }
             vscode.window.showInformationMessage(`Project structure for ${projectName} created successfully in workspace root!`);

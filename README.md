@@ -5,14 +5,15 @@ A VS Code extension to generate project folder structures for various frameworks
 ## ✨ Features
 
 - Generate project structures for:
+
      - 📱 Flutter (Architectures like Clean Architecture, MVVM, Basic, Feature-First and  state managements like BLoC, Riverpod, GetX, Provider, MobX, Cubit, and None/Add later)
-     - 🐹 Go
-     - 🟢 Node.js
-     - 🚀 FastAPI
-     - 🎸 Django
+     - 🐹 Go(Gin, Echo, Fiber, Chi, or None)
+     - 🟢 Node.js(Express)
+     - 🚀 FastAPI(Python)
+     - 🎸 Django(Python)
      - 🦀 Rust
-     - ⚛️ React
-     - ▲ Next.js
+     - ⚛️ React(JavaScript)
+     - ▲ Next.js(JavaScript)
      - 🔨 CMake (C++ project with tests)
      - 🏗️ Angular(TypeScript with standard Angular CLI structure)
      - 🎨 Vue(TypeScript with standard Vue CLI structure)

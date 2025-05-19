@@ -5,7 +5,7 @@ import { NodejsGenerator } from './generators/nodejsGenerator';
 import { FastapiGenerator } from './generators/fastapiGenerator';
 import { RustGenerator } from './generators/rustGenerator';
 import { ReactGenerator } from './generators/reactGenerator';
-import { FlutterStateManagement, GoFramework, ProjectType } from './generators/types';
+import { FlutterStateManagement, GoFramework, NodejsFramework, ProjectType } from './generators/types';
 import { FlutterArchitecture } from './generators/flutterGenerator';
 import { DjangoGenerator } from './generators/djangoGenerator';
 import { NextjsGenerator } from './generators/nextjsGenerator';
@@ -27,7 +27,7 @@ export function activate(context: vscode.ExtensionContext) {
 
         // Select project type
         const projectType = await vscode.window.showQuickPick(
-            ['Flutter(Dart)', 'Go', 'Node.js(JavaScript)', 'FastAPI(Python)', 'Django(Python)', 'Rust', 'Next.js(JavaScript)', 'React(JavaScript)', 'CMake(C++)','Angular', 'Vue'],
+            ['Flutter(Dart)', 'Go', 'Node.js(JavaScript)', 'FastAPI(Python)', 'Django(Python)', 'Rust', 'Next.js(JavaScript)', 'React(JavaScript)', 'CMake(C++)','Angular', 'Vue', 'Spring Boot'],
             { placeHolder: 'Select project type' }
         );
 
@@ -168,7 +168,20 @@ export function activate(context: vscode.ExtensionContext) {
                     break;
 
                 case 'Node.js(JavaScript)':
-                    const nodejsGenerator = new NodejsGenerator(projectPath, projectName);
+                    const nodeFramework = await vscode.window.showQuickPick(
+                        ['Express', 'Koa', 'NestJS', 'Fastify', 'Hapi', 'None/Add later'],
+                        { placeHolder: 'Select Node.js framework' }
+                    );
+
+                    if (!nodeFramework) {
+                        return;
+                    }
+
+                    const nodejsGenerator = new NodejsGenerator({
+                        projectPath,
+                        projectName,
+                        nodeFramework: nodeFramework as NodejsFramework
+                    });
                     await nodejsGenerator.generate();
                     break;
 

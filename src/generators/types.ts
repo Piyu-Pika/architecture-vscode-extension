@@ -10,7 +10,7 @@ export enum FlutterStateManagement {
     None = 'None/Add later'
 }
 export type GoFramework = 'Gin' | 'Echo' | 'Fiber' | 'Chi' | 'None';
-// export type NodejsFramework = 'Express' | 'Koa' | 'NestJS' | 'Fastify' | 'Hapi' | 'None/Add later';
+export type NodejsFramework = 'Express' | 'Koa' | 'NestJS' | 'Fastify' | 'Hapi' | 'None/Add later';
 // export type RustFramework = 'Actix' | 'Axum' | 'Warp' | 'None/Add later';
 
 // angular ,vue 
@@ -19,5 +19,6 @@ export interface ProjectConfig {
     projectPath: string;
     projectName: string;
     goFramework?: GoFramework;
+    nodeFramework?: NodejsFramework;
     githubUsername?: string;
 }
