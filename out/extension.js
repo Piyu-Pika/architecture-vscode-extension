@@ -17,6 +17,7 @@ const vueGenerator_1 = require("./generators/vueGenerator");
 const springbootGenerator_1 = require("./generators/springbootGenerator");
 const kotlinGenerator_1 = require("./generators/kotlinGenerator");
 const dependancyInstall_1 = require("./dependancyInstall");
+const custormStructureGenerator_1 = require("./generators/custormStructureGenerator");
 function activate(context) {
     let disposable = vscode.commands.registerCommand('codearchitect.generate', async () => {
         // Get workspace folder
@@ -27,7 +28,7 @@ function activate(context) {
         }
         const projectPath = workspaceFolders[0].uri.fsPath;
         // Select project type
-        const projectType = await vscode.window.showQuickPick(['Flutter(Dart)', 'Go', 'Node.js(JavaScript)', 'FastAPI(Python)', 'Django(Python)', 'Rust', 'Next.js(JavaScript)', 'React(JavaScript)', 'CMake(C++)', 'Angular', 'Vue', 'Spring Boot', 'Kotlin'], { placeHolder: 'Select project type' });
+        const projectType = await vscode.window.showQuickPick(['Flutter(Dart)', 'Go', 'Node.js(JavaScript)', 'FastAPI(Python)', 'Django(Python)', 'Rust', 'Next.js(JavaScript)', 'React(JavaScript)', 'CMake(C++)', 'Angular', 'Vue', 'Spring Boot', 'Kotlin', 'Custom'], { placeHolder: 'Select project type' });
         if (!projectType) {
             return;
         }
@@ -159,7 +160,11 @@ function activate(context) {
                     projectGenerated = true;
                     break;
                 case 'Rust':
-                    const rustGenerator = new rustGenerator_1.RustGenerator(projectPath, projectName);
+                    const rustFramework = await vscode.window.showQuickPick(['Actix', 'Axum', 'Warp', 'None/Add later'], { placeHolder: 'Select Rust framework' });
+                    if (!rustFramework) {
+                        return;
+                    }
+                    const rustGenerator = new rustGenerator_1.RustGenerator(projectPath, projectName, rustFramework);
                     await rustGenerator.generate();
                     projectGenerated = true;
                     break;
@@ -197,6 +202,17 @@ function activate(context) {
                     const kotlinGenerator = new kotlinGenerator_1.KotlinGenerator(projectPath, projectName);
                     await kotlinGenerator.generate();
                     projectGenerated = true;
+                    break;
+                case 'Custom':
+                    const customGenerator = new custormStructureGenerator_1.CustomStructureGenerator(projectPath, projectName);
+                    const customGenerated = await customGenerator.generate();
+                    if (customGenerated) {
+                        vscode.window.showInformationMessage(`Custom project structure for ${projectName} created successfully!`);
+                    }
+                    else {
+                        vscode.window.showWarningMessage(`Custom project structure creation for ${projectName} was canceled or failed.`);
+                    }
+                    projectGenerated = customGenerated;
                     break;
             }
             if (projectGenerated) {

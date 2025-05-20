@@ -5,7 +5,7 @@ import { NodejsGenerator } from './generators/nodejsGenerator';
 import { FastapiGenerator } from './generators/fastapiGenerator';
 import { RustGenerator } from './generators/rustGenerator';
 import { ReactGenerator } from './generators/reactGenerator';
-import { FlutterStateManagement, GoFramework, NodejsFramework, ProjectType } from './generators/types';
+import { FlutterStateManagement, GoFramework, NodejsFramework, ProjectType, RustFramework } from './generators/types';
 import { FlutterArchitecture } from './generators/flutterGenerator';
 import { DjangoGenerator } from './generators/djangoGenerator';
 import { NextjsGenerator } from './generators/nextjsGenerator';
@@ -15,6 +15,7 @@ import { VueGenerator } from './generators/vueGenerator';
 import { SpringBootGenerator } from './generators/springbootGenerator';
 import { KotlinGenerator } from './generators/kotlinGenerator';
 import { DependencyInstallerFactory } from './dependancyInstall';
+// import { CustomStructureGenerator } from './generators/custormStructureGenerator';
 
 export function activate(context: vscode.ExtensionContext) {
     let disposable = vscode.commands.registerCommand('codearchitect.generate', async () => {
@@ -213,7 +214,16 @@ export function activate(context: vscode.ExtensionContext) {
                     break;
 
                 case 'Rust':
-                    const rustGenerator = new RustGenerator(projectPath, projectName);
+                    const rustFramework = await vscode.window.showQuickPick(
+                        ['Actix', 'Axum', 'Warp', 'None/Add later'],
+                        { placeHolder: 'Select Rust framework' }
+                    );
+
+                    if (!rustFramework) {
+                        return;
+                    }
+
+                    const rustGenerator = new RustGenerator(projectPath, projectName, rustFramework as RustFramework);
                     await rustGenerator.generate();
                     projectGenerated = true;
                     break;
@@ -258,7 +268,7 @@ export function activate(context: vscode.ExtensionContext) {
                     const kotlinGenerator = new KotlinGenerator(projectPath, projectName);
                     await kotlinGenerator.generate();
                     projectGenerated = true;
-                    break;
+                    break;   
             }
 
             if (projectGenerated) {

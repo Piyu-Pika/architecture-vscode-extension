@@ -18,6 +18,8 @@ A VS Code extension to generate project folder structures for various frameworks
      - 🏗️ Angular(TypeScript with standard Angular CLI structure)
      - 🎨 Vue(TypeScript with standard Vue CLI structure)
      - 🚛 Spring Boot(Java with standard Spring Boot structure)
+     - 🐍 Kotlin(Android app developed with Kotlin)
+     - more to come...
      
 - 🎯 Interactive UI through VS Code command palette
 - 🛠️ Customizable project name and organization identifier (for Flutter)
@@ -26,6 +28,11 @@ A VS Code extension to generate project folder structures for various frameworks
 - 📝 README.md generation for All projects
 -    Auto Dependencies installation for all frameworks
 - much more to come...
+
+## Demo Video
+[![Demo Video](https://img.youtube.com/vi/dCJMxHjxc64/0.jpg)](https://youtu.be/dCJMxHjxc64?si=swGWpwyVEti5-rwW)
+
+Click the image above to watch the demo video on YouTube.
 
 
 ## 🚀 Usage
