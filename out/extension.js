@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.activate = activate;
 exports.deactivate = deactivate;
 const vscode = require("vscode");
+const fs = require("fs/promises");
 const flutterGenerator_1 = require("./generators/flutterGenerator");
 const goGenerator_1 = require("./generators/goGenerator");
 const nodejsGenerator_1 = require("./generators/nodejsGenerator");
@@ -17,7 +18,8 @@ const vueGenerator_1 = require("./generators/vueGenerator");
 const springbootGenerator_1 = require("./generators/springbootGenerator");
 const kotlinGenerator_1 = require("./generators/kotlinGenerator");
 const dependancyInstall_1 = require("./dependancyInstall");
-const custormStructureGenerator_1 = require("./generators/custormStructureGenerator");
+const path = require("path");
+// import { CustomStructureGenerator } from './generators/custormStructureGenerator';
 function activate(context) {
     let disposable = vscode.commands.registerCommand('codearchitect.generate', async () => {
         // Get workspace folder
@@ -28,7 +30,7 @@ function activate(context) {
         }
         const projectPath = workspaceFolders[0].uri.fsPath;
         // Select project type
-        const projectType = await vscode.window.showQuickPick(['Flutter(Dart)', 'Go', 'Node.js(JavaScript)', 'FastAPI(Python)', 'Django(Python)', 'Rust', 'Next.js(JavaScript)', 'React(JavaScript)', 'CMake(C++)', 'Angular', 'Vue', 'Spring Boot', 'Kotlin', 'Custom'], { placeHolder: 'Select project type' });
+        const projectType = await vscode.window.showQuickPick(['Flutter(Dart)', 'Go', 'Node.js(JavaScript)', 'FastAPI(Python)', 'Django(Python)', 'Rust', 'Next.js(JavaScript)', 'React(JavaScript)', 'CMake(C++)', 'Angular', 'Vue', 'Spring Boot', 'Kotlin'], { placeHolder: 'Select project type' });
         if (!projectType) {
             return;
         }
@@ -203,17 +205,6 @@ function activate(context) {
                     await kotlinGenerator.generate();
                     projectGenerated = true;
                     break;
-                case 'Custom':
-                    const customGenerator = new custormStructureGenerator_1.CustomStructureGenerator(projectPath, projectName);
-                    const customGenerated = await customGenerator.generate();
-                    if (customGenerated) {
-                        vscode.window.showInformationMessage(`Custom project structure for ${projectName} created successfully!`);
-                    }
-                    else {
-                        vscode.window.showWarningMessage(`Custom project structure creation for ${projectName} was canceled or failed.`);
-                    }
-                    projectGenerated = customGenerated;
-                    break;
             }
             if (projectGenerated) {
                 vscode.window.showInformationMessage(`Project structure for ${projectName} created successfully in workspace root!`);
@@ -238,6 +229,55 @@ function activate(context) {
         }
     });
     context.subscriptions.push(disposable);
+    // Add more commands as needed (e.g., cleanup backups)
+    let cleanupBackups = vscode.commands.registerCommand('codearchitect.cleanupBackups', async () => {
+        // Ensure a workspace is open
+        const workspaceFolders = vscode.workspace.workspaceFolders;
+        if (!workspaceFolders) {
+            vscode.window.showErrorMessage('No workspace folder is open. Please open a project to clean up backups.');
+            return;
+        }
+        // Get the root path of the first workspace folder
+        const rootPath = workspaceFolders[0].uri.fsPath;
+        try {
+            // Find all files and folders with .backup extension
+            const backupItems = [];
+            const items = await fs.readdir(rootPath, { withFileTypes: true });
+            for (const item of items) {
+                if (item.name.endsWith('.backup')) {
+                    backupItems.push(item.name);
+                }
+            }
+            // If no backup files/folders are found, inform the user
+            if (backupItems.length === 0) {
+                vscode.window.showInformationMessage('No .backup files or folders found in the workspace.');
+                return;
+            }
+            // Show the list of backup items to the user
+            const backupList = backupItems.join(', ');
+            const confirmationMessage = `The following .backup items will be deleted: ${backupList}\n\nThis is an irreversible change. Are you sure you want to proceed?`;
+            // Prompt for confirmation
+            const userChoice = await vscode.window.showWarningMessage(confirmationMessage, { modal: true }, 'Yes, Delete', 'No, Cancel');
+            // If the user cancels, exit
+            if (userChoice !== 'Yes, Delete') {
+                vscode.window.showInformationMessage('Cleanup cancelled.');
+                return;
+            }
+            // Delete the backup items
+            for (const item of backupItems) {
+                const itemPath = path.join(rootPath, item);
+                await fs.rm(itemPath, { recursive: true, force: true });
+            }
+            // Notify the user of success
+            vscode.window.showInformationMessage(`Successfully deleted ${backupItems.length} .backup items.`);
+        }
+        catch (error) {
+            // Handle any errors during the process
+            vscode.window.showErrorMessage(`Failed to clean up backups: ${error instanceof Error ? error.message : String(error)}`);
+        }
+    });
+    // Add the command to the extension context
+    context.subscriptions.push(cleanupBackups);
 }
 function deactivate() { }
 //# sourceMappingURL=extension.js.map

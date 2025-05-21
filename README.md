@@ -1,73 +1,76 @@
-# 🏗️ CodeArchitect
+# CodeArchitect  
+*Automate your project setup with instant, framework-ready starter files for VS Code* ✨
 
-A VS Code extension to generate project folder structures for various frameworks and languages, including Flutter, Go, Node.js, FastAPI, Django, Rust, React, CMake, Next.js, Angular, Vue, Spring Boot, and more.
+---
 
-## ✨ Features
+## 🚀 Key Features  
+[![Demo Video](https://img.youtube.com/vi/dCJMxHjxc64/0.jpg)](https://youtu.be/dCJMxHjxc64?si=swGWpwyVEti5-rwW)  
+*Watch a video demo of the extension in action*
 
-- Generate project structures for:
+### 🛠️ Core Capabilities  
+- **30+ Project Templates**:  
+  ![Flutter, Go, Rust, Node.js, React](https://img.shields.io/badge/frameworks-Flutter%20%7C%20Go%20%7C%20Rust%20%7C%20Node.js%20%7C%20etc.-black?style=flat)  
+  *(Expandable list of supported frameworks for each language)*  
+  - **Flutter**: Clean Architecture/MVVM, state management (BLoC/Riverpod/GetX/Provider)  
+  - **Rust**: Actix/Axum/Warp or custom setups  
+  - **Node.js**: Express/NestJS/Fastify & customization options  
+  - **CMake/Kotlin**: Coming soon? Or currently supported? (Clarify based on implementation)  
 
-     - 📱 Flutter (Architectures like Clean Architecture, MVVM, Basic, Feature-First and  state managements like BLoC, Riverpod, GetX, Provider, MobX, Cubit, and None/Add later)
-     - 🐹 Go(Gin, Echo, Fiber, Chi, or None)
-     - 🟢 Node.js(Express)
-     - 🚀 FastAPI(Python)
-     - 🎸 Django(Python)
-     - 🦀 Rust
-     - ⚛️ React(JavaScript)
-     - ▲ Next.js(JavaScript)
-     - 🔨 CMake (C++ project with tests)
-     - 🏗️ Angular(TypeScript with standard Angular CLI structure)
-     - 🎨 Vue(TypeScript with standard Vue CLI structure)
-     - 🚛 Spring Boot(Java with standard Spring Boot structure)
-     - 🐍 Kotlin(Android app developed with Kotlin)
-     - more to come...
-     
-- 🎯 Interactive UI through VS Code command palette
-- 🛠️ Customizable project name and organization identifier (for Flutter)
-- 💾 Automatic backup of existing conflicting files or folders
-- 🧠 Smart GitHub module path generation for Go projects
-- 📝 README.md generation for All projects
--    Auto Dependencies installation for all frameworks
-- much more to come...
+- **Safeguards**:  
+  ⚠️ Autobackup of existing files with `.backup` extensions (no overwrites!).  
+  💾 Automatic rollbacks or cleanup tools via `Code Architect: Clean Up Backup Files`
 
-## Demo Video
-[![Demo Video](https://img.youtube.com/vi/dCJMxHjxc64/0.jpg)](https://youtu.be/dCJMxHjxc64?si=swGWpwyVEti5-rwW)
+- **User Experience**:  
+  - CLI-driven wizard in VS Code  
+  - Cross-platform compatibility  
 
-Click the image above to watch the demo video on YouTube.
+---
+
+## 🛠️ How to Use  
+
+### 6-Step Quick Start  
+1. **Open Project Root Folder**:  
+   Ensure your project folder is your VS Code workspace.  
+
+2. **Launch via Command Palette**:  
+   Press `Cmd/Ctrl+Shift+P` → type `Code Architect: Generate Project Structure`.  
+
+3. **Choose Frameworks**:  
+   - **Project Type** (e.g., Flutter, Angular, Next.js, CMake, Kotlin)  
+   - **Project Name**: Enter your project name.  
+   - **Project-Specific Config**:  
+     - *Flutter:* Org ID (e.g., `com.example`), architecture, state management  
+     - *Rust:* Actix/Axum/Warp selection  
+     - *Go:* Framework (e.g., Gin, Echo)  
+
+4. **Backup Confirmed**  
+   Existing files are saved to `<file_name>.backup` if conflicts occur.  
+
+5. **Generate Structure**  
+   Watch folders/files scaffold in your project!  
+
+6. **Cleanup**  
+   🗑️ Remove backups via `Code Architect: Clean Up Backup Files` from the palette.  
+
+---
+
+## 📦 Installation  
+### Option 1: Install from Marketplace  
+[![VS Code Marketplace](https://img.shields.io/vscode-marketplace/v/Piyu-Pika.code-architect-tool?color=blue)](https://marketplace.visualstudio.com/items?itemName=Piyu-Pika.code-architect-tool)  
+
+### Option 2: Local Development  
+```bash
+# From root of this repository:
+npm install && vsce package
+```
+
+---
+
+## 📄 Licenses  
+Licensed under [CC BY-NC v4.0](LICENSE.txt). .  
 
 
-## 🚀 Usage
+---
+Questions? Report issues → [GitHub Repo Issues][issue-link]
 
-Follow these steps to use the extension effectively:
-
-1. **📁 Open the Root Directory of Your Project**  
-      Ensure that the root directory of your project is open in VS Code. This is where the generated project structure will be created.
-
-2. **▶️ Run the Extension**  
-      Open the Command Palette by pressing `Ctrl+Shift+P` (Windows/Linux) or `Cmd+Shift+P` (Mac).  
-      Search for and select the command `Code Architect: Generate Project Structure`.
-
-3. **🔍 Choose the Options**  
-      - Select the type of project you want to generate (e.g., Flutter, Go, Node.js, FastAPI, Django, Rust, React, or Next.js).  
-      - Enter the project name when prompted.  
-      - For Flutter projects, you will be asked to:
-           - Enter an organization identifier (e.g., `com.example`).  
-           - Choose the architecture type (e.g., Clean Architecture or MVVM).  
-           - Select a state management solution (e.g., BLoC, Riverpod, GetX, Provider, or None/Add later).
-
-4. **🔄 Backup Existing Folders**  
-      If any existing folders or files in the root directory conflict with the new structure, they will be automatically backed up. The backups will have the extension `.backup` appended to their names, ensuring that no data is lost.
-
-5. **👀 View the Generated Structure**  
-      Once the process is complete, the new project structure will be created in the root directory. You can now start working on your project with the organized layout.
-
-## 📦 Installation
-
-1. Install from VS Code Marketplace (TBD).
-2. Or, package locally:
-      ```bash
-      npm install
-      vsce package
-      ```
-
-## 📄 License
-This extension is licensed under the [CC BY-NC License](LICENSE.txt).
+[issue-link]: https://github.com/Piyu-Pika/architecture-vscode-extension/issues
