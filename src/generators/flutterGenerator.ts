@@ -1,7 +1,7 @@
 import * as fs from 'fs/promises';
 import * as path from 'path';
 
-export type FlutterArchitecture = 'Clean Architecture' | 'MVVM' | 'Basic' | 'Feature-First';
+export type FlutterArchitecture = 'Clean Architecture' | 'MVVM' | 'Basic' | 'Feature-First'|'BLoC Architecture';
 export type FlutterStateManagement = 'BLoC' | 'Riverpod' | 'Provider' | 'GetX' | 'Cubit' | 'MobX' | 'None/Add later';
 
 export interface ProjectConfig {
@@ -14,7 +14,11 @@ export interface ProjectConfig {
 }
 
 export class FlutterGenerator {
-    constructor(private config: ProjectConfig) {}
+    constructor(private config: ProjectConfig) {
+        if (this.config.architecture === 'BLoC Architecture') {
+            this.config.stateManagement = 'BLoC';
+        }
+    }
 
     async generate() {
         // Create basic Flutter project structure
@@ -33,6 +37,9 @@ export class FlutterGenerator {
                 break;
             case 'Basic':
                 await this.createBasicStructure();
+                break;
+            case 'BLoC Architecture':
+                await this.createBlocArchitectureStructure();
                 break;
             default:
                 await this.createBasicStructure();
@@ -249,6 +256,103 @@ flutter:
             await this.createSampleHomeScreen('features/home/screens');
         }
     }
+    private async createBlocArchitectureStructure() {
+        const libPath = path.join(this.config.projectPath, 'lib');
+        
+        // Create folder structure for BLoC Architecture
+        const folders = [
+            'data/models',
+            'data/repositories',
+            'data/datasources',
+            'domain/entities',
+            'domain/repositories',
+            'domain/usecases',
+            'presentation/bloc',
+            'presentation/screens',
+            'presentation/widgets',
+            'core/utils',
+            'core/constants',
+            'core/network',
+            'core/theme',
+            'core/bloc',
+            'di'
+        ];
+
+        for (const folder of folders) {
+            const fullPath = path.join(libPath, folder);
+            await fs.mkdir(fullPath, { recursive: true });
+        }
+
+        // Create sample bloc files
+        await this.createSampleBlocFiles();
+
+        // Create sample home screen scaffold
+        if (this.config.createSampleScreens) {
+            await this.createSampleHomeScreen('presentation/screens');
+        }
+    }
+    private async createSampleBlocFiles() {
+        const blocPath = path.join(this.config.projectPath, 'lib', 'presentation', 'bloc');
+        
+        // Create sample counter bloc
+        await fs.writeFile(
+            path.join(blocPath, 'counter_event.dart'),
+            `part of 'counter_bloc.dart';
+
+@immutable
+abstract class CounterEvent {}
+
+class IncrementEvent extends CounterEvent {}
+
+class DecrementEvent extends CounterEvent {}
+`
+        );
+
+        await fs.writeFile(
+            path.join(blocPath, 'counter_state.dart'),
+            `part of 'counter_bloc.dart';
+
+@immutable
+class CounterState {
+  final int count;
+  
+  const CounterState({this.count = 0});
+  
+  CounterState copyWith({int? count}) {
+    return CounterState(
+      count: count ?? this.count,
+    );
+  }
+}
+`
+        );
+
+        await fs.writeFile(
+            path.join(blocPath, 'counter_bloc.dart'),
+            `import 'package:bloc/bloc.dart';
+import 'package:meta/meta.dart';
+
+part 'counter_event.dart';
+part 'counter_state.dart';
+
+class CounterBloc extends Bloc<CounterEvent, CounterState> {
+  CounterBloc() : super(const CounterState()) {
+    on<IncrementEvent>(_onIncrement);
+    on<DecrementEvent>(_onDecrement);
+  }
+
+  void _onIncrement(IncrementEvent event, Emitter<CounterState> emit) {
+    emit(state.copyWith(count: state.count + 1));
+  }
+
+  void _onDecrement(DecrementEvent event, Emitter<CounterState> emit) {
+    emit(state.copyWith(count: state.count - 1));
+  }
+}
+`
+        );
+    }
+
 
     private async createMainFile() {
         const mainPath = path.join(this.config.projectPath, 'lib', 'main.dart');

@@ -10,11 +10,11 @@
 ### 🛠️ Core Capabilities  
 - **30+ Project Templates**:  
   ![Flutter, Go, Rust, Node.js, React](https://img.shields.io/badge/frameworks-Flutter%20%7C%20Go%20%7C%20Rust%20%7C%20Node.js%20%7C%20etc.-black?style=flat)  
-  *(Expandable list of supported frameworks for each language)*  
+    
   - **Flutter**: Clean Architecture/MVVM, state management (BLoC/Riverpod/GetX/Provider)  
   - **Rust**: Actix/Axum/Warp or custom setups  
   - **Node.js**: Express/NestJS/Fastify & customization options  
-  - **CMake/Kotlin**: Coming soon? Or currently supported? (Clarify based on implementation)  
+  - **CMake/Kotlin**: currently supported
 
 - **Safeguards**:  
   ⚠️ Autobackup of existing files with `.backup` extensions (no overwrites!).  
