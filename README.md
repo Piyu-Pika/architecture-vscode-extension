@@ -33,7 +33,7 @@
    Ensure your project folder is your VS Code workspace.  
 
 2. **Launch via Command Palette**:  
-   Press `Cmd/Ctrl+Shift+P` → type `Code Architect: Generate Project Structure`.  
+   Press `Cmd/Ctrl+Shift+P` → type `Code Architect: Generate Project Structure` or Press `cmd/ctrl+shift+a`
 
 3. **Choose Frameworks**:  
    - **Project Type** (e.g., Flutter, Angular, Next.js, CMake, Kotlin)  
@@ -50,7 +50,7 @@
    Watch folders/files scaffold in your project!  
 
 6. **Cleanup**  
-   🗑️ Remove backups via `Code Architect: Clean Up Backup Files` from the palette.  
+   🗑️ Remove backups via `Code Architect: Clean Up Backup Files` from the palette or Press `cmd/ctrl+shift+b`.
 
 ---
 
