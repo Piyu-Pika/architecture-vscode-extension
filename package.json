@@ -17,7 +17,6 @@
   ],
   "icon": "assets/architecture-icon.png",
   "activationEvents": [
-    "onCommand:codearchitect.generate"
     
   ],
   "repository": {
