@@ -19,6 +19,7 @@ const springbootGenerator_1 = require("./generators/springbootGenerator");
 const kotlinGenerator_1 = require("./generators/kotlinGenerator");
 const dependancyInstall_1 = require("./dependancyInstall");
 const path = require("path");
+const projectRunner_1 = require("./projectRunner");
 // import { CustomStructureGenerator } from './generators/custormStructureGenerator';
 function activate(context) {
     let disposable = vscode.commands.registerCommand('codearchitect.generate', async () => {
@@ -276,6 +277,28 @@ function activate(context) {
             vscode.window.showErrorMessage(`Failed to clean up backups: ${error instanceof Error ? error.message : String(error)}`);
         }
     });
+    // Command to run the Project Runner
+    const projectRunnerCommand = vscode.commands.registerCommand('codearchitect.projectRunner', async () => {
+        const workspaceFolders = vscode.workspace.workspaceFolders;
+        if (!workspaceFolders || workspaceFolders.length === 0) {
+            vscode.window.showErrorMessage('No workspace folder is open.');
+            return;
+        }
+        const workspacePath = workspaceFolders[0].uri.fsPath;
+        const mode = await vscode.window.showQuickPick(['dev', 'prod', 'debug'], { placeHolder: 'Select the mode' });
+        if (!mode) {
+            vscode.window.showErrorMessage('No mode selected.');
+            return;
+        }
+        try {
+            await projectRunner_1.AutoProjectManager.runFromWorkspace(mode);
+            vscode.window.showInformationMessage(`Project is running in ${mode} mode.`);
+        }
+        catch (error) {
+            vscode.window.showErrorMessage(`Failed to run project: ${error}`);
+        }
+    });
+    context.subscriptions.push(projectRunnerCommand);
     // Add the command to the extension context
     context.subscriptions.push(cleanupBackups);
 }

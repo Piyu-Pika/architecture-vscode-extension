@@ -5,7 +5,7 @@
   
   "displayName": "CodeArchitect Tool",
   "description": "Generate project folder structures for Flutter, Go, Node.js, and FastAPI",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "engines": {
     "vscode": "^1.85.0"
   },
@@ -40,6 +40,10 @@
         "command": "codearchitect.cleanupBackups",
         "title": "CodeArchitect: Clean Up Backup Files"
         
+      },
+      {
+        "command": "codearchitect.projectRunner",
+        "title": "CodeArchitect: Run Project"
       }
       
     ],
@@ -48,11 +52,22 @@
         "command": "codearchitect.generate",
         "key": "ctrl+shift+a",
         "mac": "cmd+shift+a",
+        "linux": "ctrl+shift+a",
+        "win": "ctrl+shift+a",
         "when": "editorTextFocus"
       },{
         "command": "codearchitect.cleanupBackups",
         "key": "ctrl+shift+b",
         "mac": "cmd+shift+b",
+        "linux": "ctrl+shift+b",
+        "win": "ctrl+shift+b",
+        "when": "editorTextFocus"
+      },{
+        "command": "codearchitect.projectRunner",
+        "key": "ctrl+r",
+        "mac": "cmd+r",
+        "win": "ctrl+r",
+        "linux": "ctrl+r",
         "when": "editorTextFocus"
       }
     ]

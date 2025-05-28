@@ -17,6 +17,8 @@ import { SpringBootGenerator } from './generators/springbootGenerator';
 import { KotlinGenerator } from './generators/kotlinGenerator';
 import { DependencyInstallerFactory } from './dependancyInstall';
 import path = require('path');
+import { AutoProjectManager } from './projectRunner';
+
 // import { CustomStructureGenerator } from './generators/custormStructureGenerator';
 
 export function activate(context: vscode.ExtensionContext) {
@@ -30,7 +32,8 @@ export function activate(context: vscode.ExtensionContext) {
         }
 
         const projectPath = workspaceFolders[0].uri.fsPath;
-
+        
+        
         // Select project type
         const projectType = await vscode.window.showQuickPick(
             ['Flutter(Dart)', 'Go', 'Node.js(JavaScript)', 'FastAPI(Python)', 'Django(Python)', 'Rust', 'Next.js(JavaScript)', 'React(JavaScript)', 'CMake(C++)', 'Angular', 'Vue', 'Spring Boot', 'Kotlin'],
@@ -361,6 +364,34 @@ export function activate(context: vscode.ExtensionContext) {
           vscode.window.showErrorMessage(`Failed to clean up backups: ${error instanceof Error ? error.message : String(error)}`);
         }
       });
+
+    // Command to run the Project Runner
+    const projectRunnerCommand = vscode.commands.registerCommand('codearchitect.projectRunner', async () => {
+      const workspaceFolders = vscode.workspace.workspaceFolders;
+      if (!workspaceFolders || workspaceFolders.length === 0) {
+        vscode.window.showErrorMessage('No workspace folder is open.');
+        return;
+      }
+
+      const workspacePath = workspaceFolders[0].uri.fsPath;
+
+      const mode = await vscode.window.showQuickPick(['dev', 'prod', 'debug'], { placeHolder: 'Select the mode' });
+
+      if (!mode) {
+        vscode.window.showErrorMessage('No mode selected.');
+        return;
+      }
+
+      try {
+        await AutoProjectManager.runFromWorkspace(mode as 'dev' | 'prod' | 'debug');
+        vscode.window.showInformationMessage(`Project is running in ${mode} mode.`);
+      } catch (error) {
+        vscode.window.showErrorMessage(`Failed to run project: ${error}`);
+      }
+    });
+
+    context.subscriptions.push(projectRunnerCommand);
+
     
       // Add the command to the extension context
       context.subscriptions.push(cleanupBackups);

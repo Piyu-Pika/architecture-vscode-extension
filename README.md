@@ -15,6 +15,11 @@
   - **Rust**: Actix/Axum/Warp or custom setups  
   - **Node.js**: Express/NestJS/Fastify & customization options  
   - **CMake/Kotlin**: currently supported
+  - **FastAPI**: currently supported
+  - **SpringBoot**: currently supported
+  - **Django**: currently supported
+  - **Go**: currently supported
+
 
 - **Safeguards**:  
   ⚠️ Autobackup of existing files with `.backup` extensions (no overwrites!).  
@@ -23,6 +28,13 @@
 - **User Experience**:  
   - CLI-driven wizard in VS Code  
   - Cross-platform compatibility  
+
+- **Run Project**:  
+  - 🏃‍♀️ Run your project hassle-free in the different modes (dev/prod/debug).
+  - 🔌 Supports Flutter, Go, Rust, Node.js, and FastAPI projects.
+  - Automatically detects project type and runs it.
+  - Supports different entry points (e.g., main.py, app.js, main.go, etc.).
+
 
 ---
 
@@ -51,6 +63,10 @@
 
 6. **Cleanup**  
    🗑️ Remove backups via `Code Architect: Clean Up Backup Files` from the palette or Press `cmd/ctrl+shift+b`.
+
+7. **Run Project**  
+   🏃‍♀️ Run your project from the palette or Press `cmd/ctrl+r`.
+   Run your project hassle-free in the different modes (dev/prod/debug).
 
 ---
 
