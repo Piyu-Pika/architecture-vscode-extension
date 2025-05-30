@@ -95,7 +95,7 @@ function activate(context) {
             switch (projectType) {
                 case 'Flutter(Dart)':
                     // For Flutter, select architecture with new options
-                    const architecture = await vscode.window.showQuickPick(['Clean Architecture', 'MVVM', 'Feature-First', 'Basic'], { placeHolder: 'Select architecture type' });
+                    const architecture = await vscode.window.showQuickPick(['Clean Architecture', 'MVVM', 'Feature-First', 'BLoC Architecture', 'Basic'], { placeHolder: 'Select architecture type' });
                     if (!architecture) {
                         return;
                     }

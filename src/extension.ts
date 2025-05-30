@@ -120,7 +120,7 @@ export function activate(context: vscode.ExtensionContext) {
             case 'Flutter(Dart)':
                 // For Flutter, select architecture with new options
                 const architecture = await vscode.window.showQuickPick(
-                    ['Clean Architecture', 'MVVM', 'Feature-First', 'Basic'],
+                    ['Clean Architecture', 'MVVM', 'Feature-First', 'BLoC Architecture','Basic'],
                     { placeHolder: 'Select architecture type' }
                 );
 

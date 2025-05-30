@@ -1,5 +1,5 @@
 export type ProjectType = 'Flutter' | 'Go' | 'Node.js' | 'FastAPI' | 'Django' | 'Rust' | 'NextJS' | 'React'| 'CMake'| 'Angular' | 'Vue'|'SpringBoot'| 'Kotlin';
-export type FlutterArchitecture = 'Clean Architecture' | 'MVVM'| 'Basic' | 'Feature-First'| 'None/Add later';
+export type FlutterArchitecture = 'Clean Architecture' | 'MVVM'| 'Basic' | 'Feature-First'|'BLoC Architecture' |'None/Add later';
 export enum FlutterStateManagement {
     Bloc = 'BLoC',
     Riverpod = 'Riverpod',
