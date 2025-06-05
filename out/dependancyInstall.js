@@ -11,6 +11,20 @@ class TerminalManager {
         }
         return this.terminal;
     }
+    // Add this method to your existing TerminalManager class
+    static async executeCommandWithOutput(command, workingDirectory) {
+        return new Promise((resolve, reject) => {
+            const { exec } = require('child_process');
+            const options = workingDirectory ? { cwd: workingDirectory } : {};
+            exec(command, options, (error, stdout, stderr) => {
+                if (error) {
+                    reject(new Error(`Command failed: ${error.message}`));
+                    return;
+                }
+                resolve(stdout.trim());
+            });
+        });
+    }
     // Execute a command in the terminal
     static async executeCommand(command, cwd) {
         const terminal = this.getTerminal();

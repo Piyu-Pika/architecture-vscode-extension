@@ -279,26 +279,77 @@ function activate(context) {
     });
     // Command to run the Project Runner
     const projectRunnerCommand = vscode.commands.registerCommand('codearchitect.projectRunner', async () => {
+        // Check if workspace is available
+        const workspaceFolders = vscode.workspace.workspaceFolders;
+        if (!workspaceFolders || workspaceFolders.length === 0) {
+            vscode.window.showErrorMessage('No workspace folder is open.');
+            return;
+        }
+        // Show mode selection
+        const mode = await vscode.window.showQuickPick([
+            { label: 'Development', value: 'dev', description: 'Run in development mode with hot reload' },
+            { label: 'Production', value: 'prod', description: 'Run in production mode' },
+            { label: 'Debug', value: 'debug', description: 'Run in debug mode with debugging enabled' }
+        ], {
+            placeHolder: 'Select the mode to run your project',
+            title: 'Project Run Mode'
+        });
+        if (!mode) {
+            return; // User cancelled selection
+        }
+        try {
+            // Show initial message
+            vscode.window.showInformationMessage(`Starting project in ${mode.label.toLowerCase()} mode...`);
+            // Run the project using AutoProjectManager
+            await projectRunner_1.AutoProjectManager.runFromWorkspace(mode.value);
+            // Success message will be handled by the AutoProjectManager internally
+            // No need to show another success message here to avoid duplication
+        }
+        catch (error) {
+            // This catch block provides an additional safety net
+            // The AutoProjectManager.runFromWorkspace already handles most errors
+            console.error('Project runner command error:', error);
+            vscode.window.showErrorMessage(`Unexpected error while running project: ${error}`);
+        }
+    });
+    context.subscriptions.push(projectRunnerCommand);
+    // Enhanced project runner with device selection
+    const enhancedProjectRunnerCommand = vscode.commands.registerCommand('codearchitect.runProjectWithDevices', async () => {
         const workspaceFolders = vscode.workspace.workspaceFolders;
         if (!workspaceFolders || workspaceFolders.length === 0) {
             vscode.window.showErrorMessage('No workspace folder is open.');
             return;
         }
         const workspacePath = workspaceFolders[0].uri.fsPath;
-        const mode = await vscode.window.showQuickPick(['dev', 'prod', 'debug'], { placeHolder: 'Select the mode' });
-        if (!mode) {
-            vscode.window.showErrorMessage('No mode selected.');
+        // Mode selection
+        const mode = await vscode.window.showQuickPick([
+            { label: 'Development', value: 'dev' },
+            { label: 'Production', value: 'prod' },
+            { label: 'Debug', value: 'debug' }
+        ], { placeHolder: 'Select the mode to run your project' });
+        if (!mode)
             return;
-        }
         try {
-            await projectRunner_1.AutoProjectManager.runFromWorkspace(mode);
-            vscode.window.showInformationMessage(`Project is running in ${mode} mode.`);
+            vscode.window.showInformationMessage(`Starting project with device selection in ${mode.label.toLowerCase()} mode...`);
+            // Use the enhanced version with device selection
+            await projectRunner_1.EnhancedAutoProjectManager.autoRunProjectWithDeviceSelection(workspacePath, undefined, mode.value);
         }
         catch (error) {
-            vscode.window.showErrorMessage(`Failed to run project: ${error}`);
+            console.error('Enhanced project runner error:', error);
+            vscode.window.showErrorMessage(`Failed to run project with device selection: ${error}`);
         }
     });
-    context.subscriptions.push(projectRunnerCommand);
+    // Command to show project info
+    const showProjectInfoCommand = vscode.commands.registerCommand('codearchitect.showProjectInfo', async () => {
+        const workspaceFolders = vscode.workspace.workspaceFolders;
+        if (!workspaceFolders || workspaceFolders.length === 0) {
+            vscode.window.showErrorMessage('No workspace folder is open.');
+            return;
+        }
+        const workspacePath = workspaceFolders[0].uri.fsPath;
+        await projectRunner_1.AutoProjectManager.showProjectInfo(workspacePath);
+    });
+    context.subscriptions.push(projectRunnerCommand, enhancedProjectRunnerCommand, showProjectInfoCommand);
     // Add the command to the extension context
     context.subscriptions.push(cleanupBackups);
 }

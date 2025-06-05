@@ -12,6 +12,19 @@ export interface ProjectRunner {
   findEntryPoint?(projectPath: string): Promise<string | null>;
 }
 
+export interface DeviceInfo {
+  id: string;
+  name: string;
+  platform: string;
+  isEmulator: boolean;
+  isConnected: boolean;
+}
+
+export interface EnhancedProjectRunner extends ProjectRunner {
+  getAvailableDevices?(): Promise<DeviceInfo[]>;
+  runProjectOnDevice?(projectPath: string, projectName: string, deviceId: string, mode?: 'dev' | 'prod' | 'debug'): Promise<void>;
+}
+
 // Entry point detection configuration
 interface EntryPointRule {
   projectType: ProjectType;
@@ -589,14 +602,140 @@ export class ProjectDetector {
     return { detectedType, availableTypes, confidence, entryPoint };
   }
 }
+export class DeviceManager {
+  static async getFlutterDevices(): Promise<DeviceInfo[]> {
+    try {
+      const result = await TerminalManager.executeCommandWithOutput('flutter devices --machine');
+      const devices = JSON.parse(result);
+      return devices.map((device: any) => ({
+        id: device.id,
+        name: device.name,
+        platform: device.platform,
+        isEmulator: device.emulator,
+        isConnected: device.isConnected
+      }));
+    } catch (error) {
+      console.error('Failed to get Flutter devices:', error);
+      return [];
+    }
+  }
+
+  static async getAndroidDevices(): Promise<DeviceInfo[]> {
+    try {
+      const result = await TerminalManager.executeCommandWithOutput('adb devices');
+      const lines = result.split('\n').slice(1);
+      const devices: DeviceInfo[] = [];
+      
+      for (const line of lines) {
+        if (line.trim() && line.includes('\tdevice')) {
+          const deviceId = line.split('\t')[0];
+          devices.push({
+            id: deviceId,
+            name: `Android Device (${deviceId})`,
+            platform: 'android',
+            isEmulator: deviceId.includes('emulator'),
+            isConnected: true
+          });
+        }
+      }
+      return devices;
+    } catch (error) {
+      console.error('Failed to get Android devices:', error);
+      return [];
+    }
+  }
+
+  static async getIOSDevices(): Promise<DeviceInfo[]> {
+    try {
+      const result = await TerminalManager.executeCommandWithOutput('xcrun simctl list devices --json');
+      const data = JSON.parse(result);
+      const devices: DeviceInfo[] = [];
+      
+      for (const runtime in data.devices) {
+        if (data.devices[runtime]) {
+          for (const device of data.devices[runtime]) {
+            if (device.state === 'Booted' || device.state === 'Shutdown') {
+              devices.push({
+                id: device.udid,
+                name: device.name,
+                platform: 'ios',
+                isEmulator: true,
+                isConnected: device.state === 'Booted'
+              });
+            }
+          }
+        }
+      }
+      return devices;
+    } catch (error) {
+      console.error('Failed to get iOS devices:', error);
+      return [];
+    }
+  }
+
+  static async selectDevice(devices: DeviceInfo[]): Promise<DeviceInfo | undefined> {
+    if (devices.length === 0) {
+      vscode.window.showErrorMessage('No devices available');
+      return undefined;
+    }
+
+    const deviceItems = devices.map(device => ({
+      label: `${device.name} ${device.isConnected ? '🟢' : '🔴'}`,
+      description: `${device.platform} • ${device.isEmulator ? 'Emulator' : 'Physical'} • ${device.id}`,
+      device: device
+    }));
+
+    const selected = await vscode.window.showQuickPick(deviceItems, {
+      placeHolder: 'Select a device to run on',
+      title: 'Device Selection'
+    });
+
+    return selected?.device;
+  }
+}
 
 // Enhanced implementations for different project runners
-export class FlutterProjectRunner implements ProjectRunner {
+export class FlutterProjectRunner implements EnhancedProjectRunner {
   async findEntryPoint(projectPath: string): Promise<string | null> {
     return await EntryPointDetector.findEntryPoint(projectPath, 'Flutter');
   }
 
+  async getAvailableDevices(): Promise<DeviceInfo[]> {
+    return await DeviceManager.getFlutterDevices();
+  }
+
+  async runProjectOnDevice(projectPath: string, projectName: string, deviceId: string, mode: 'dev' | 'prod' | 'debug' = 'dev'): Promise<void> {
+    const entryPoint = await this.findEntryPoint(`${projectPath}/${projectName}`);
+    const commands = this.getRunCommandsForDevice(deviceId, mode);
+    
+    if (entryPoint) {
+      vscode.window.showInformationMessage(`Running Flutter app from: ${entryPoint} on device: ${deviceId}`);
+    }
+    
+    await TerminalManager.executeCommands(commands, `${projectPath}/${projectName}`);
+  }
+
   async runProject(projectPath: string, projectName: string, mode: 'dev' | 'prod' | 'debug' = 'dev'): Promise<void> {
+    // Check if user wants to select device
+    const useDeviceSelection = await vscode.window.showQuickPick(
+      [
+        { label: 'Auto-select device', value: false },
+        { label: 'Choose specific device', value: true }
+      ],
+      { placeHolder: 'Device selection preference' }
+    );
+
+    if (useDeviceSelection?.value) {
+      const devices = await this.getAvailableDevices();
+      const selectedDevice = await DeviceManager.selectDevice(devices);
+      
+      if (selectedDevice) {
+        await this.runProjectOnDevice(projectPath, projectName, selectedDevice.id, mode);
+        return;
+      }
+    }
+
+    // Default behavior - auto-select device
     const entryPoint = await this.findEntryPoint(`${projectPath}/${projectName}`);
     const commands = this.getRunCommands(mode);
     
@@ -605,6 +744,20 @@ export class FlutterProjectRunner implements ProjectRunner {
     }
     
     await TerminalManager.executeCommands(commands, `${projectPath}/${projectName}`);
+  }
+
+  private getRunCommandsForDevice(deviceId: string, mode: 'dev' | 'prod' | 'debug'): string[] {
+    const baseCommand = `flutter run -d ${deviceId}`;
+    
+    switch (mode) {
+      case 'debug':
+        return [`${baseCommand} --debug`];
+      case 'prod':
+        return [`${baseCommand} --release`];
+      case 'dev':
+      default:
+        return [baseCommand];
+    }
   }
 
   getRunCommands(mode: 'dev' | 'prod' | 'debug' = 'dev'): string[] {
@@ -619,6 +772,100 @@ export class FlutterProjectRunner implements ProjectRunner {
     }
   }
 }
+export class ReactNativeProjectRunner implements EnhancedProjectRunner {
+  async findEntryPoint(projectPath: string): Promise<string | null> {
+    const possibleEntries = ['index.js', 'index.tsx', 'App.js', 'App.tsx'];
+    for (const entry of possibleEntries) {
+      const fullPath = path.join(projectPath, entry);
+      if (await this.fileExists(fullPath)) {
+        return entry;
+      }
+    }
+    return null;
+  }
+
+  async getAvailableDevices(): Promise<DeviceInfo[]> {
+    const androidDevices = await DeviceManager.getAndroidDevices();
+    const iosDevices = process.platform === 'darwin' ? await DeviceManager.getIOSDevices() : [];
+    return [...androidDevices, ...iosDevices];
+  }
+
+  async runProjectOnDevice(projectPath: string, projectName: string, deviceId: string, mode: 'dev' | 'prod' | 'debug' = 'dev'): Promise<void> {
+    const devices = await this.getAvailableDevices();
+    const device = devices.find(d => d.id === deviceId);
+    
+    if (!device) {
+      vscode.window.showErrorMessage(`Device ${deviceId} not found`);
+      return;
+    }
+
+    const commands = this.getRunCommandsForDevice(device.platform, deviceId, mode);
+    vscode.window.showInformationMessage(`Running React Native on ${device.name}`);
+    
+    await TerminalManager.executeCommands(commands, `${projectPath}/${projectName}`);
+  }
+
+  async runProject(projectPath: string, projectName: string, mode: 'dev' | 'prod' | 'debug' = 'dev'): Promise<void> {
+    const useDeviceSelection = await vscode.window.showQuickPick(
+      [
+        { label: 'Run on Android', value: 'android' },
+        { label: 'Run on iOS', value: 'ios' },
+        { label: 'Choose specific device', value: 'select' }
+      ],
+      { placeHolder: 'Select platform or device' }
+    );
+
+    if (useDeviceSelection?.value === 'select') {
+      const devices = await this.getAvailableDevices();
+      const selectedDevice = await DeviceManager.selectDevice(devices);
+      
+      if (selectedDevice) {
+        await this.runProjectOnDevice(projectPath, projectName, selectedDevice.id, mode);
+        return;
+      }
+    } else if (useDeviceSelection?.value) {
+      const commands = this.getRunCommands(mode, useDeviceSelection.value);
+      await TerminalManager.executeCommands(commands, `${projectPath}/${projectName}`);
+      return;
+    }
+
+    // Default to Android
+    const commands = this.getRunCommands(mode, 'android');
+    await TerminalManager.executeCommands(commands, `${projectPath}/${projectName}`);
+  }
+
+  private getRunCommandsForDevice(platform: string, deviceId: string, mode: 'dev' | 'prod' | 'debug'): string[] {
+    if (platform === 'android') {
+      return [`npx react-native run-android --deviceId=${deviceId}`];
+    } else if (platform === 'ios') {
+      return [`npx react-native run-ios --simulator="${deviceId}"`];
+    }
+    return [];
+  }
+
+  getRunCommands(mode: 'dev' | 'prod' | 'debug' = 'dev', platform: string = 'android'): string[] {
+    const variant = mode === 'prod' ? '--variant=release' : '';
+    
+    if (platform === 'android') {
+      return [`npx react-native run-android ${variant}`.trim()];
+    } else if (platform === 'ios') {
+      const configuration = mode === 'prod' ? '--configuration Release' : '';
+      return [`npx react-native run-ios ${configuration}`.trim()];
+    }
+    
+    return ['npx react-native start'];
+  }
+
+  private async fileExists(filePath: string): Promise<boolean> {
+    try {
+      const stat = await fs.promises.stat(filePath);
+      return stat.isFile();
+    } catch {
+      return false;
+    }
+  }
+}
+
 
 export class GoProjectRunner implements ProjectRunner {
   async findEntryPoint(projectPath: string): Promise<string | null> {
@@ -824,19 +1071,21 @@ export class FastAPIProjectRunner implements ProjectRunner {
 // Following the same pattern with entry point detection
 
 // Factory remains the same
-export class ProjectRunnerFactory {
-  static getRunner(projectType: ProjectType): ProjectRunner {
+export class EnhancedProjectRunnerFactory {
+  static getRunner(projectType: ProjectType): EnhancedProjectRunner {
     switch (projectType) {
       case 'Flutter':
         return new FlutterProjectRunner();
+      // case 'React Native':
+      //   return new ReactNativeProjectRunner();
       case 'Go':
-        return new GoProjectRunner();
+        return new GoProjectRunner() as EnhancedProjectRunner;
       case 'Django':
-        return new DjangoProjectRunner();
+        return new DjangoProjectRunner() as EnhancedProjectRunner;
       case 'FastAPI':
-        return new FastAPIProjectRunner();
+        return new FastAPIProjectRunner() as EnhancedProjectRunner;
       case 'Rust':
-        return new RustProjectRunner();
+        return new RustProjectRunner() as EnhancedProjectRunner;
       // Add other cases...
       default:
         throw new Error(`Project runner not implemented for project type: ${projectType}`);
@@ -929,7 +1178,7 @@ export class AutoProjectManager {
     fullPath: string, 
     mode: 'dev' | 'prod' | 'debug'
   ): Promise<void> {
-    const runner = ProjectRunnerFactory.getRunner(projectType);
+    const runner = EnhancedProjectRunnerFactory.getRunner(projectType);
     vscode.window.showInformationMessage(
       `Detected ${projectType} project. Starting in ${mode} mode...`
     );
@@ -964,5 +1213,96 @@ export class AutoProjectManager {
 
     const workspacePath = workspaceFolders[0].uri.fsPath;
     await this.autoRunProject(workspacePath, undefined, mode);
+  }
+}
+
+// Enhanced AutoProjectManager with device selection
+export class EnhancedAutoProjectManager extends AutoProjectManager {
+  // Auto-detect and run project with device selection
+  static async autoRunProjectWithDeviceSelection(
+    projectPath: string, 
+    projectName?: string,
+    mode: 'dev' | 'prod' | 'debug' = 'dev'
+  ): Promise<void> {
+    try {
+      const fullPath = projectName ? `${projectPath}/${projectName}` : projectPath;
+      const detectedType = await ProjectDetector.detectProjectType(fullPath);
+      
+      if (!detectedType) {
+        vscode.window.showErrorMessage(
+          'Could not detect project type. Please ensure you are in a valid project directory.'
+        );
+        return;
+      }
+
+      const runner = EnhancedProjectRunnerFactory.getRunner(detectedType);
+      
+      // Check if runner supports device selection
+      if (runner.getAvailableDevices && runner.runProjectOnDevice) {
+        const devices = await runner.getAvailableDevices();
+        
+        if (devices.length > 0) {
+          const useDeviceSelection = await vscode.window.showQuickPick(
+            [
+              { label: 'Run with default settings', value: false },
+              { label: 'Choose specific device', value: true }
+            ],
+            { placeHolder: 'Device selection preference' }
+          );
+
+          if (useDeviceSelection?.value) {
+            const selectedDevice = await DeviceManager.selectDevice(devices);
+            if (selectedDevice) {
+              await runner.runProjectOnDevice(path.dirname(fullPath), path.basename(fullPath), selectedDevice.id, mode);
+              return;
+            }
+          }
+        }
+      }
+
+      // Fallback to regular run
+      await runner.runProject(path.dirname(fullPath), path.basename(fullPath), mode);
+      
+    } catch (error) {
+      vscode.window.showErrorMessage(`Failed to auto-run project: ${error}`);
+    }
+  }
+
+  // Show available devices for current project
+  static async showAvailableDevices(projectPath: string): Promise<void> {
+    try {
+      const detectedType = await ProjectDetector.detectProjectType(projectPath);
+      
+      if (!detectedType) {
+        vscode.window.showErrorMessage('Could not detect project type.');
+        return;
+      }
+
+      const runner = EnhancedProjectRunnerFactory.getRunner(detectedType);
+      
+      if (!runner.getAvailableDevices) {
+        vscode.window.showInformationMessage(`Device selection not supported for ${detectedType} projects.`);
+        return;
+      }
+
+      const devices = await runner.getAvailableDevices();
+      
+      if (devices.length === 0) {
+        vscode.window.showInformationMessage('No devices found.');
+        return;
+      }
+
+      const deviceList = devices.map(device => 
+        `${device.name} (${device.platform}) - ${device.isConnected ? 'Connected' : 'Disconnected'}`
+      ).join('\n');
+
+      vscode.window.showInformationMessage(
+        `Available devices for ${detectedType}:\n\n${deviceList}`,
+        { modal: true }
+      );
+      
+    } catch (error) {
+      vscode.window.showErrorMessage(`Failed to get devices: ${error}`);
+    }
   }
 }

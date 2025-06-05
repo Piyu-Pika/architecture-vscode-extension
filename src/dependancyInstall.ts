@@ -17,6 +17,21 @@ export class TerminalManager {
     }
     return this.terminal;
   }
+  // Add this method to your existing TerminalManager class
+static async executeCommandWithOutput(command: string, workingDirectory?: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const { exec } = require('child_process');
+    const options = workingDirectory ? { cwd: workingDirectory } : {};
+    
+    exec(command, options, (error: any, stdout: string, stderr: string) => {
+      if (error) {
+        reject(new Error(`Command failed: ${error.message}`));
+        return;
+      }
+      resolve(stdout.trim());
+    });
+  });
+}
   
   // Execute a command in the terminal
   public static async executeCommand(command: string, cwd?: string): Promise<void> {

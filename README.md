@@ -65,8 +65,11 @@
    🗑️ Remove backups via `Code Architect: Clean Up Backup Files` from the palette or Press `cmd/ctrl+shift+b`.
 
 7. **Run Project**  
-   🏃‍♀️ Run your project from the palette or Press `cmd/ctrl+r`.
-   Run your project hassle-free in the different modes (dev/prod/debug).
+   🏃‍♀️ Run your project directly from the palette by selecting `Code Architect: Run Project` or pressing `Cmd/Ctrl+Shift+R`.  
+      - Choose your preferred mode: **Development**, **Production**, or **Debug**.  
+      - Supports device selection for compatible frameworks like Flutter.  
+      - Automatically detects entry points (e.g., `main.py`, `app.js`, `main.go`) and runs the project seamlessly.  
+      - Enhanced compatibility for cross-platform development environments.
 
 ---
 
