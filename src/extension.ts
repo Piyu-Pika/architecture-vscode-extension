@@ -18,6 +18,7 @@ import { KotlinGenerator } from './generators/kotlinGenerator';
 import { DependencyInstallerFactory } from './dependancyInstall';
 import path = require('path');
 import { AutoProjectManager, EnhancedAutoProjectManager } from './projectRunner';
+import { ReactNativeGenerator } from './generators/reactNativeGenerator';
 
 // import { CustomStructureGenerator } from './generators/custormStructureGenerator';
 
@@ -36,7 +37,7 @@ export function activate(context: vscode.ExtensionContext) {
         
         // Select project type
         const projectType = await vscode.window.showQuickPick(
-            ['Flutter(Dart)', 'Go', 'Node.js(JavaScript)', 'FastAPI(Python)', 'Django(Python)', 'Rust', 'Next.js(JavaScript)', 'React(JavaScript)', 'CMake(C++)', 'Angular', 'Vue', 'Spring Boot', 'Kotlin'],
+            ['Flutter(Dart)', 'Go', 'Node.js(JavaScript)', 'FastAPI(Python)', 'Django(Python)', 'Rust', 'Next.js(JavaScript)', 'React(JavaScript)', 'CMake(C++)', 'Angular', 'Vue', 'Spring Boot', 'Kotlin', 'React Native'],
             { placeHolder: 'Select project type' }
         );
 
@@ -275,6 +276,11 @@ export function activate(context: vscode.ExtensionContext) {
                     await kotlinGenerator.generate();
                     projectGenerated = true;
                     break;   
+                case 'React Native':
+                    const reactNativeGenerator = new ReactNativeGenerator(projectPath, projectName); 
+                    await reactNativeGenerator.generate();
+                    projectGenerated = true;
+                    break;
             }
 
             if (projectGenerated) {

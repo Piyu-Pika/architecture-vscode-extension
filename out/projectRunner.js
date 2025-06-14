@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.EnhancedAutoProjectManager = exports.AutoProjectManager = exports.EnhancedProjectRunnerFactory = exports.FastAPIProjectRunner = exports.DjangoProjectRunner = exports.RustProjectRunner = exports.GoProjectRunner = exports.ReactNativeProjectRunner = exports.FlutterProjectRunner = exports.DeviceManager = exports.ProjectDetector = exports.EntryPointDetector = void 0;
+exports.EnhancedAutoProjectManager = exports.AutoProjectManager = exports.EnhancedProjectRunnerFactory = exports.FastAPIProjectRunner = exports.DjangoProjectRunner = exports.RustProjectRunner = exports.GoProjectRunner = exports.ReactNativeProjectRunner = exports.CMakeProjectRunner = exports.KotlinProjectRunner = exports.NodeProjectRunner = exports.SpringBootProjectRunner = exports.VueProjectRunner = exports.AngularProjectRunner = exports.NextJSProjectRunner = exports.ReactProjectRunner = exports.FlutterProjectRunner = exports.DeviceManager = exports.ProjectDetector = exports.EntryPointDetector = void 0;
 const vscode = require("vscode");
 const fs = require("fs");
 const path = require("path");
@@ -85,6 +85,18 @@ const ENTRY_POINT_RULES = [
             'src/App.js',
             'src/App.tsx',
             'public/index.html'
+        ],
+        primaryFile: 'index.js'
+    },
+    {
+        projectType: 'ReactNative',
+        possiblePaths: [
+            'index.js',
+            'index.tsx',
+            'App.js',
+            'App.tsx',
+            'src/index.js',
+            'src/index.tsx'
         ],
         primaryFile: 'index.js'
     },
@@ -329,6 +341,14 @@ const DETECTION_RULES = [
         packageJsonScripts: ['start'],
         fileContent: [{ file: 'package.json', contains: '"react"' }],
         optionalFiles: ['src/App.js', 'src/App.tsx', 'public/index.html']
+    },
+    {
+        projectType: 'ReactNative',
+        priority: 9,
+        files: ['package.json'],
+        packageJsonScripts: ['start', 'android', 'ios'],
+        fileContent: [{ file: 'package.json', contains: '"react-native"' }],
+        optionalFiles: ['index.js', 'App.js']
     },
     {
         projectType: 'Angular',
@@ -676,6 +696,212 @@ class FlutterProjectRunner {
     }
 }
 exports.FlutterProjectRunner = FlutterProjectRunner;
+// ReactProjectRunner
+class ReactProjectRunner {
+    async findEntryPoint(projectPath) {
+        return await EntryPointDetector.findEntryPoint(projectPath, 'React');
+    }
+    async runProject(projectPath, projectName, mode = 'dev') {
+        const entryPoint = await this.findEntryPoint(`${projectPath}/${projectName}`);
+        const commands = this.getRunCommands(mode);
+        if (entryPoint) {
+            vscode.window.showInformationMessage(`Running React project from: ${entryPoint}`);
+        }
+        await dependancyInstall_1.TerminalManager.executeCommands(commands, `${projectPath}/${projectName}`);
+    }
+    getRunCommands(mode = 'dev') {
+        switch (mode) {
+            case 'debug':
+                return ['npm run start'];
+            case 'prod':
+                return ['npm run build', 'npm run start'];
+            case 'dev':
+            default:
+                return ['npm run start'];
+        }
+    }
+}
+exports.ReactProjectRunner = ReactProjectRunner;
+// NextJSProjectRunner
+class NextJSProjectRunner {
+    async findEntryPoint(projectPath) {
+        return await EntryPointDetector.findEntryPoint(projectPath, 'NextJS');
+    }
+    async runProject(projectPath, projectName, mode = 'dev') {
+        const entryPoint = await this.findEntryPoint(`${projectPath}/${projectName}`);
+        const commands = this.getRunCommands(mode);
+        if (entryPoint) {
+            vscode.window.showInformationMessage(`Running NextJS project from: ${entryPoint}`);
+        }
+        await dependancyInstall_1.TerminalManager.executeCommands(commands, `${projectPath}/${projectName}`);
+    }
+    getRunCommands(mode = 'dev') {
+        switch (mode) {
+            case 'debug':
+                return ['npm run dev'];
+            case 'prod':
+                return ['npm run build', 'npm run start'];
+            case 'dev':
+            default:
+                return ['npm run dev'];
+        }
+    }
+}
+exports.NextJSProjectRunner = NextJSProjectRunner;
+class AngularProjectRunner {
+    async findEntryPoint(projectPath) {
+        return await EntryPointDetector.findEntryPoint(projectPath, 'Angular');
+    }
+    async runProject(projectPath, projectName, mode = 'dev') {
+        const entryPoint = await this.findEntryPoint(`${projectPath}/${projectName}`);
+        const commands = this.getRunCommands(mode);
+        if (entryPoint) {
+            vscode.window.showInformationMessage(`Running Angular project from: ${entryPoint}`);
+        }
+        await dependancyInstall_1.TerminalManager.executeCommands(commands, `${projectPath}/${projectName}`);
+    }
+    getRunCommands(mode = 'dev') {
+        switch (mode) {
+            case 'debug':
+                return ['npm run start'];
+            case 'prod':
+                return ['npm run build', 'npm run start'];
+            case 'dev':
+            default:
+                return ['npm run start'];
+        }
+    }
+}
+exports.AngularProjectRunner = AngularProjectRunner;
+// VueProjectRunner
+class VueProjectRunner {
+    async findEntryPoint(projectPath) {
+        return await EntryPointDetector.findEntryPoint(projectPath, 'Vue');
+    }
+    async runProject(projectPath, projectName, mode = 'dev') {
+        const entryPoint = await this.findEntryPoint(`${projectPath}/${projectName}`);
+        const commands = this.getRunCommands(mode);
+        if (entryPoint) {
+            vscode.window.showInformationMessage(`Running Vue project from: ${entryPoint}`);
+        }
+        await dependancyInstall_1.TerminalManager.executeCommands(commands, `${projectPath}/${projectName}`);
+    }
+    getRunCommands(mode = 'dev') {
+        switch (mode) {
+            case 'debug':
+                return ['npm run serve'];
+            case 'prod':
+                return ['npm run build', 'npm run serve'];
+            case 'dev':
+            default:
+                return ['npm run serve'];
+        }
+    }
+}
+exports.VueProjectRunner = VueProjectRunner;
+// SpringBootProjectRunner
+class SpringBootProjectRunner {
+    async findEntryPoint(projectPath) {
+        return await EntryPointDetector.findEntryPoint(projectPath, 'SpringBoot');
+    }
+    async runProject(projectPath, projectName, mode = 'dev') {
+        const entryPoint = await this.findEntryPoint(`${projectPath}/${projectName}`);
+        const commands = this.getRunCommands(mode);
+        if (entryPoint) {
+            vscode.window.showInformationMessage(`Running SpringBoot project from: ${entryPoint}`);
+        }
+        await dependancyInstall_1.TerminalManager.executeCommands(commands, `${projectPath}/${projectName}`);
+    }
+    getRunCommands(mode = 'dev') {
+        switch (mode) {
+            case 'debug':
+                return ['./gradlew bootRun'];
+            case 'prod':
+                return ['./gradlew bootJar', 'java -jar build/libs/spring-boot-demo-0.0.1-SNAPSHOT.jar'];
+            case 'dev':
+            default:
+                return ['./gradlew bootRun'];
+        }
+    }
+}
+exports.SpringBootProjectRunner = SpringBootProjectRunner;
+class NodeProjectRunner {
+    async findEntryPoint(projectPath) {
+        return await EntryPointDetector.findEntryPoint(projectPath, 'Node.js');
+    }
+    async runProject(projectPath, projectName, mode = 'dev') {
+        const entryPoint = await this.findEntryPoint(`${projectPath}/${projectName}`);
+        const commands = this.getRunCommands(mode);
+        if (entryPoint) {
+            vscode.window.showInformationMessage(`Running Node.js project from: ${entryPoint}`);
+        }
+        await dependancyInstall_1.TerminalManager.executeCommands(commands, `${projectPath}/${projectName}`);
+    }
+    getRunCommands(mode = 'dev') {
+        switch (mode) {
+            case 'debug':
+                return ['node --inspect index.js'];
+            case 'prod':
+                return ['node index.js'];
+            case 'dev':
+            default:
+                return ['npm run dev'];
+        }
+    }
+}
+exports.NodeProjectRunner = NodeProjectRunner;
+//kotlinProjectRunner
+class KotlinProjectRunner {
+    async findEntryPoint(projectPath) {
+        return await EntryPointDetector.findEntryPoint(projectPath, 'Kotlin');
+    }
+    async runProject(projectPath, projectName, mode = 'dev') {
+        const entryPoint = await this.findEntryPoint(`${projectPath}/${projectName}`);
+        const commands = this.getRunCommands(mode);
+        if (entryPoint) {
+            vscode.window.showInformationMessage(`Running Kotlin project from: ${entryPoint}`);
+        }
+        await dependancyInstall_1.TerminalManager.executeCommands(commands, `${projectPath}/${projectName}`);
+    }
+    getRunCommands(mode = 'dev') {
+        switch (mode) {
+            case 'debug':
+                return ['./gradlew run'];
+            case 'prod':
+                return ['./gradlew build', './gradlew run'];
+            case 'dev':
+            default:
+                return ['./gradlew run'];
+        }
+    }
+}
+exports.KotlinProjectRunner = KotlinProjectRunner;
+//cmakeProjectRunner
+class CMakeProjectRunner {
+    async findEntryPoint(projectPath) {
+        return await EntryPointDetector.findEntryPoint(projectPath, 'CMake');
+    }
+    async runProject(projectPath, projectName, mode = 'dev') {
+        const entryPoint = await this.findEntryPoint(`${projectPath}/${projectName}`);
+        const commands = this.getRunCommands(mode);
+        if (entryPoint) {
+            vscode.window.showInformationMessage(`Running CMake project from: ${entryPoint}`);
+        }
+        await dependancyInstall_1.TerminalManager.executeCommands(commands, `${projectPath}/${projectName}`);
+    }
+    getRunCommands(mode = 'dev') {
+        switch (mode) {
+            case 'debug':
+                return ['cmake --build .'];
+            case 'prod':
+                return ['cmake --build . --target install'];
+            case 'dev':
+            default:
+                return ['cmake --build .'];
+        }
+    }
+}
+exports.CMakeProjectRunner = CMakeProjectRunner;
 class ReactNativeProjectRunner {
     async findEntryPoint(projectPath) {
         const possibleEntries = ['index.js', 'index.tsx', 'App.js', 'App.tsx'];
@@ -941,8 +1167,6 @@ class EnhancedProjectRunnerFactory {
         switch (projectType) {
             case 'Flutter':
                 return new FlutterProjectRunner();
-            // case 'React Native':
-            //   return new ReactNativeProjectRunner();
             case 'Go':
                 return new GoProjectRunner();
             case 'Django':
@@ -951,7 +1175,24 @@ class EnhancedProjectRunnerFactory {
                 return new FastAPIProjectRunner();
             case 'Rust':
                 return new RustProjectRunner();
-            // Add other cases...
+            case 'ReactNative':
+                return new ReactNativeProjectRunner();
+            case 'React':
+                return new ReactProjectRunner();
+            case 'NextJS':
+                return new NextJSProjectRunner();
+            case 'Angular':
+                return new AngularProjectRunner();
+            case 'Vue':
+                return new VueProjectRunner();
+            case 'SpringBoot':
+                return new SpringBootProjectRunner();
+            case 'Node.js':
+                return new NodeProjectRunner();
+            case 'CMake':
+                return new CMakeProjectRunner();
+            case 'Kotlin':
+                return new KotlinProjectRunner();
             default:
                 throw new Error(`Project runner not implemented for project type: ${projectType}`);
         }

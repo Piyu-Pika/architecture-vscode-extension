@@ -5,7 +5,7 @@
   
   "displayName": "CodeArchitect Tool",
   "description": "Generate project folder structures for Flutter, Go, Node.js, and FastAPI",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "engines": {
     "vscode": "^1.85.0"
   },
@@ -73,13 +73,20 @@
       },{
         "command": "codearchitect.projectRunner",
         "key": "ctrl+r",
-        "mac": "cmd+r",
-        "when": "editorTextFocus"
+        "mac": "cmd+r"
       },
       {
         "command": "codearchitect.runProjectWithDevices",
         "key": "ctrl+shift+r", 
         "mac": "cmd+shift+r",
+        "win": "ctrl+shift+r",
+        "linux": "ctrl+shift+r"
+      },{
+        "command": "codearchitect.showProjectInfo",
+        "key": "ctrl+shift+i",
+        "mac": "cmd+shift+i",
+        "linux": "ctrl+shift+i",
+        "win": "ctrl+shift+i",
         "when": "editorTextFocus"
       }
     ]

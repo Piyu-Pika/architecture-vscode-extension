@@ -218,6 +218,8 @@ export class DependencyInstallerFactory {
       case 'NextJS':
       case 'React':
         return new ReactDependencyInstaller();
+      case 'ReactNative':
+        return new ReactDependencyInstaller(); // Assuming React Native uses similar commands
       case 'CMake':
         return new CMakeDependencyInstaller();
       case 'Angular':

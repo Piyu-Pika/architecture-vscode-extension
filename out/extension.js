@@ -20,6 +20,7 @@ const kotlinGenerator_1 = require("./generators/kotlinGenerator");
 const dependancyInstall_1 = require("./dependancyInstall");
 const path = require("path");
 const projectRunner_1 = require("./projectRunner");
+const reactNativeGenerator_1 = require("./generators/reactNativeGenerator");
 // import { CustomStructureGenerator } from './generators/custormStructureGenerator';
 function activate(context) {
     let disposable = vscode.commands.registerCommand('codearchitect.generate', async () => {
@@ -31,7 +32,7 @@ function activate(context) {
         }
         const projectPath = workspaceFolders[0].uri.fsPath;
         // Select project type
-        const projectType = await vscode.window.showQuickPick(['Flutter(Dart)', 'Go', 'Node.js(JavaScript)', 'FastAPI(Python)', 'Django(Python)', 'Rust', 'Next.js(JavaScript)', 'React(JavaScript)', 'CMake(C++)', 'Angular', 'Vue', 'Spring Boot', 'Kotlin'], { placeHolder: 'Select project type' });
+        const projectType = await vscode.window.showQuickPick(['Flutter(Dart)', 'Go', 'Node.js(JavaScript)', 'FastAPI(Python)', 'Django(Python)', 'Rust', 'Next.js(JavaScript)', 'React(JavaScript)', 'CMake(C++)', 'Angular', 'Vue', 'Spring Boot', 'Kotlin', 'React Native'], { placeHolder: 'Select project type' });
         if (!projectType) {
             return;
         }
@@ -204,6 +205,11 @@ function activate(context) {
                 case 'Kotlin':
                     const kotlinGenerator = new kotlinGenerator_1.KotlinGenerator(projectPath, projectName);
                     await kotlinGenerator.generate();
+                    projectGenerated = true;
+                    break;
+                case 'React Native':
+                    const reactNativeGenerator = new reactNativeGenerator_1.ReactNativeGenerator(projectPath, projectName);
+                    await reactNativeGenerator.generate();
                     projectGenerated = true;
                     break;
             }
